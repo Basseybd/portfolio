@@ -45,7 +45,7 @@ export default function LifeFeed({ photos, seeAll }: { photos: Photo[]; seeAll?:
               </button>
               <figcaption className="mt-3 flex items-baseline justify-between gap-4">
                 <span className="font-display text-[1.1rem] font-medium leading-snug text-rice">{p.title}</span>
-                <span className="shrink-0 text-[0.85rem] text-silver">{p.place}</span>
+                <span className="max-w-[50%] text-right text-[0.85rem] leading-snug text-silver">{p.place}</span>
               </figcaption>
             </figure>
           </li>
