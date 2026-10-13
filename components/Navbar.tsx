@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { WorldLink } from "@/components/transition/WorldTransition";
+import { WorldLink, type WorldLinkProps } from "@/components/transition/WorldTransition";
 import { favorites, site } from "@/lib/content";
 
 const links = [
@@ -13,9 +14,16 @@ const links = [
 ];
 const lifeColor = favorites[0]?.accent;
 
+// On /work a section link glides there; from any other page it floods over to
+// /work and lands on the section under the cover. Never a hard jump.
+function SectionLink({ onWork, ...props }: Omit<WorldLinkProps, "world"> & { onWork: boolean }) {
+  return onWork ? <Link {...props} /> : <WorldLink world="work" {...props} />;
+}
+
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const onWork = usePathname() === "/work";
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -34,16 +42,16 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-40 bg-ground">
       <nav className="page flex h-16 items-center justify-between" aria-label="Main">
-        <Link href="/" className="font-display text-[1.3rem] font-medium tracking-[-0.01em]">
+        <WorldLink href="/" world="home" className="font-display text-[1.3rem] font-medium tracking-[-0.01em]">
           Bassey Duke
-        </Link>
+        </WorldLink>
 
         <ul className="hidden items-center gap-7 md:flex">
           {links.map((l) => (
             <li key={l.href}>
-              <Link href={l.href} className="text-[0.975rem] text-stone transition-colors duration-200 hover:text-ink">
+              <SectionLink onWork={onWork} href={l.href} className="text-[0.975rem] text-stone transition-colors duration-200 hover:text-ink">
                 {l.label}
-              </Link>
+              </SectionLink>
             </li>
           ))}
           <li>
@@ -88,9 +96,14 @@ export default function Navbar() {
         <ul id="mobile-menu" className="page pb-6 md:hidden">
           {links.map((l) => (
             <li key={l.href} className="border-b border-rule">
-              <Link href={l.href} onClick={() => setOpen(false)} className="block py-3.5 font-display text-[1.5rem] font-medium">
+              <SectionLink
+                onWork={onWork}
+                href={l.href}
+                onClick={() => setOpen(false)}
+                className="block py-3.5 font-display text-[1.5rem] font-medium"
+              >
                 {l.label}
-              </Link>
+              </SectionLink>
             </li>
           ))}
           <li className="border-b border-rule">

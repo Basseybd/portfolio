@@ -2,7 +2,8 @@
 
 // Carries a visitor from one world to the other. go() floods the screen from
 // the point they clicked, in that world's material (graphite and chrome for
-// Work, the photo's own color for Life, pale silver and chrome for Photos), pushes the route while covered, then
+// Work, the photo's own color for Life, pale silver and chrome for Photos and
+// home), pushes the route while covered, then
 // lifts the cover off the new page once it has rendered.
 //
 // Mount WorldTransitionProvider once, high in the tree, so it survives route
@@ -27,7 +28,7 @@ import {
 } from "react";
 import styles from "./WorldTransition.module.css";
 
-export type World = "work" | "life" | "photos";
+export type World = "work" | "life" | "photos" | "home";
 export type GoOptions = {
   /** Viewport x of the click. Defaults to the center of the screen. */
   x?: number;
