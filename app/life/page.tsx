@@ -5,7 +5,7 @@ import Footer, { footerLinks } from "@/components/Footer";
 import PhotoDrum from "@/components/PhotoDrum";
 import PrintDeck from "@/components/PrintDeck";
 import { WorldLink } from "@/components/transition/WorldTransition";
-import { life, photos, site } from "@/lib/content";
+import { favorites, life, photos, site } from "@/lib/content";
 
 export const metadata: Metadata = {
   title: "Life | Bassey Duke",
@@ -23,8 +23,8 @@ export const viewport: Viewport = {
 };
 
 export default function LifePage() {
-  // His portrait first, then the favorites in their set order.
-  const featured = [life.me, ...photos.filter((p) => p.featured)];
+  // His portrait first, then the favorites in their set order (see lib/content.ts).
+  const featured = [life.me, ...favorites];
   const mail = `mailto:${site.email}?subject=${encodeURIComponent(life.bookingSubject)}`;
   return (
     <div className="life-page on-dark min-h-svh overflow-x-clip bg-graphite text-rice">

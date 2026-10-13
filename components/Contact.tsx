@@ -1,5 +1,6 @@
 import ContactForm from "@/components/ContactForm";
 import CopyEmail from "@/components/CopyEmail";
+import CutInView from "@/components/CutInView";
 import { site } from "@/lib/content";
 
 export default function Contact() {
@@ -11,7 +12,7 @@ export default function Contact() {
             id="contact-title"
             className="font-display text-[2.6rem] font-medium leading-[1.08] tracking-[-0.015em] sm:text-[3.3rem]"
           >
-            Say hi.
+            <CutInView lines={["Say hi."]} />
           </h2>
           <p className="mt-6 max-w-[28rem] text-[1.0625rem] leading-relaxed text-steel">
             Questions, ideas, or want to trade notes on AI or photos? Send a

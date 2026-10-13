@@ -94,6 +94,37 @@ html:not([data-intro]) [data-preloader] {
     transform: none;
   }
 }
+/* Below the fold, CutInView holds the words down until they scroll into view. */
+.cut-armed .cut-word > span {
+  animation: none;
+  transform: translate3d(0, 110%, 0) skewY(6deg);
+}
+
+/* /photos: a block in each photo's own color wipes off as it scrolls in. */
+.rv-block {
+  position: absolute;
+  inset: 0;
+  transform: scaleX(0);
+  transform-origin: right center;
+  pointer-events: none;
+  /* The photo's color taken toward graphite, like the Work/Life flood, so it reads rich, not loud. */
+  background: color-mix(in srgb, var(--accent) 70%, #17181a);
+}
+[data-rv="armed"] .rv-block {
+  transform: scaleX(1);
+}
+[data-rv="armed"] .rv-img {
+  transform: scale(1.08);
+}
+[data-rv="in"] .rv-block {
+  transform: scaleX(0);
+  transition: transform 0.85s cubic-bezier(0.76, 0, 0.24, 1) var(--rv-delay, 0ms);
+}
+[data-rv="in"] .rv-img {
+  transform: none;
+  transition: transform 1.3s cubic-bezier(0.16, 1, 0.3, 1) var(--rv-delay, 0ms);
+}
+
 /* Hold the cut until a world transition has lifted off the page. */
 html[data-world-transition="cover"] .cut-word > span,
 html[data-world-transition="hold"] .cut-word > span {
@@ -222,6 +253,18 @@ body:has(.life-page) {
   color: #eff0ee;
   background: #141516;
   border-color: #141516;
+}
+/* On graphite the crisp top edge and the band through the middle read as stray
+   white lines, so the dark pages get one soft silver sweep instead. */
+.on-dark .btn-chrome {
+  border-color: #c9cdd1;
+  background: linear-gradient(180deg, #eef0f1 0%, #c9cdd1 100%);
+  box-shadow: 0 6px 16px -10px rgba(0, 0, 0, 0.6);
+}
+.on-dark .btn-chrome:hover {
+  color: #17181a;
+  background: #eceeeb;
+  border-color: #eceeeb;
 }
 
 /* Brushed aluminum panel. */

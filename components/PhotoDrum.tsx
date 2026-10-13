@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import CutIn from "@/components/CutIn";
 import Lightbox from "@/components/Lightbox";
 import { photoSrc, photoSrcSet, type Photo } from "@/lib/content";
 
@@ -204,7 +205,9 @@ export default function PhotoDrum({ photos }: { photos: Photo[] }) {
 
         <div className="absolute inset-x-0 bottom-0 flex h-[6.5rem] flex-col justify-end gap-2 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:flex-row sm:items-end sm:justify-between sm:gap-6">
           <p aria-live="polite" className="min-w-0">
-            <span className="block font-display text-[1.2rem] font-medium leading-tight text-rice">{current?.title}</span>
+            <span key={current?.slug} className="block font-display text-[1.2rem] font-medium leading-tight text-rice">
+              {current ? <CutIn lines={[current.title]} /> : null}
+            </span>
             <span className="mt-1 block text-[0.9rem] text-silver">{current?.place}</span>
           </p>
           <div className="flex shrink-0 items-center gap-4">
