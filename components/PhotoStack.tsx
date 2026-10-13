@@ -11,10 +11,13 @@ import { photoSrc, photoSrcSet, type Photo } from "@/lib/content";
 // finishes, so the stack never rests halfway between two photos. A band in the
 // next photo's own color rises from the bottom, the photo wipes in behind it,
 // and the one underneath settles back into the dark. It reads page scroll and
-// never takes it over; transforms and opacity only.
+// never takes it over; transforms and opacity only. While you scroll, the photo
+// drifts gently inside its frame and a hairline fills with your progress, so
+// every bit of scroll shows, but nothing ever rests halfway.
 
 const PER = 0.36; // scroll per photo, in screen heights
-const NUDGE = 0.3; // share of that scroll that moves on to the next photo, or back
+const NUDGE = 0.22; // share of that scroll that moves on to the next photo, or back (about one wheel notch)
+const DRIFT = 5; // how far the photo drifts inside its frame as you scroll, in % of its height
 const STEP_MS = 1000; // one photo to the next
 const LEAD = 0.2; // how far the color band runs ahead of the photo
 
@@ -29,6 +32,7 @@ export default function PhotoStack({ photos, seeAll }: { photos: Photo[]; seeAll
   const stage = useRef<HTMLDivElement>(null);
   const pin = useRef<HTMLDivElement>(null);
   const hint = useRef<HTMLDivElement>(null);
+  const bar = useRef<HTMLDivElement>(null);
   const cards = useRef<(HTMLButtonElement | null)[]>([]);
   const [size, setSize] = useState({ w: 0, h: 0 });
   const [front, setFront] = useState(0);
@@ -63,6 +67,7 @@ export default function PhotoStack({ photos, seeAll }: { photos: Photo[]; seeAll
     let start = 0;
     let dur = 0;
     let raf = 0;
+    let raw = 0; // where the scroll is, in photos
 
     // The hint's letters break apart and drift off over the first half stop of scroll.
     const letters = Array.from(hint.current?.querySelectorAll<HTMLElement>("[data-l]") ?? []);
@@ -86,7 +91,7 @@ export default function PhotoStack({ photos, seeAll }: { photos: Photo[]; seeAll
     const pick = () => {
       const r = section.current?.getBoundingClientRect();
       if (!r) return to;
-      const raw = clamp((pinTop() - r.top) / (window.innerHeight * PER), 0, n - 1);
+      raw = clamp((pinTop() - r.top) / (window.innerHeight * PER), 0, n - 1);
       scatter(clamp(raw / 0.55, 0, 1));
       if (raw > to + NUDGE) return Math.min(n - 1, Math.floor(raw + 1 - NUDGE));
       if (raw < to - NUDGE) return Math.max(0, Math.ceil(raw - 1 + NUDGE));
@@ -110,7 +115,9 @@ export default function PhotoStack({ photos, seeAll }: { photos: Photo[]; seeAll
         const inner = win.firstElementChild as HTMLElement;
         band.style.transform = `translate3d(0, ${(1 - block) * 100}%, 0)`;
         win.style.transform = `translate3d(0, ${(1 - img) * 100}%, 0)`;
-        inner.style.transform = `translate3d(0, ${-(1 - img) * 100}%, 0) scale(${1.08 - img * 0.08})`;
+        // Drift: a little parallax that follows the scroll, inside the photo's own frame.
+        const drift = -clamp(raw - i, -0.5, 0.5) * DRIFT;
+        inner.style.transform = `translate3d(0, ${-(1 - img) * 100 + drift}%, 0) scale(${1.14 - img * 0.08})`;
         shade.style.opacity = String(out * 0.6);
       }
       setFront(clamp(Math.round(pos), 0, n - 1));
@@ -126,7 +133,11 @@ export default function PhotoStack({ photos, seeAll }: { photos: Photo[]; seeAll
 
     const onScroll = () => {
       const next = pick();
-      if (next === to) return;
+      if (bar.current) bar.current.style.transform = `scaleX(${n > 1 ? raw / (n - 1) : 1})`;
+      if (next === to) {
+        if (!raf) raf = requestAnimationFrame(draw);
+        return;
+      }
       // A change of mind mid-move starts from wherever the stack is now.
       from = pos;
       to = next;
@@ -140,6 +151,7 @@ export default function PhotoStack({ photos, seeAll }: { photos: Photo[]; seeAll
     to = Math.round(clamp((pinTop() - r0) / (window.innerHeight * PER), 0, n - 1));
     pos = from = to;
     pick();
+    if (bar.current) bar.current.style.transform = `scaleX(${n > 1 ? raw / (n - 1) : 1})`;
     paint();
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onScroll);
@@ -239,6 +251,10 @@ export default function PhotoStack({ photos, seeAll }: { photos: Photo[]; seeAll
         </div>
 
         <div className="absolute inset-x-0 bottom-0 flex h-[6.5rem] flex-col justify-end gap-2 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:flex-row sm:items-end sm:justify-between sm:gap-6">
+          {/* How far through the set you are; fills as you scroll. */}
+          <div aria-hidden className="absolute inset-x-0 top-5 h-px bg-graphite-rule">
+            <div ref={bar} className="h-full origin-left bg-silver/80" style={{ transform: "scaleX(0)" }} />
+          </div>
           <p aria-live="polite" className="min-w-0">
             <span key={current?.slug} className="block font-display text-[1.2rem] font-medium leading-tight text-rice">
               {current ? <CutIn lines={[current.title]} /> : null}

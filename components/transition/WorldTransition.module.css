@@ -51,7 +51,8 @@
 .root[data-world="life"] .back {
   background: linear-gradient(180deg, var(--wt-tint) 0%, var(--wt-tint-deep) 100%);
 }
-.root[data-world="photos"] .back {
+.root[data-world="photos"] .back,
+.root[data-world="home"] .back {
   background: linear-gradient(180deg, #d4d7da 0%, #a7abaf 100%);
 }
 
@@ -86,7 +87,8 @@
 }
 
 /* Photos: the pale silver of the archive's own ground, lit where you touched. */
-.root[data-world="photos"] .field {
+.root[data-world="photos"] .field,
+.root[data-world="home"] .field {
   background: radial-gradient(140% 110% at var(--wt-x) var(--wt-y), #f6f7f6 0%, #e3e4e2 46%, #cfd2d4 100%);
 }
 
@@ -109,7 +111,8 @@
   );
 }
 .root[data-world="work"] .rim,
-.root[data-world="photos"] .rim {
+.root[data-world="photos"] .rim,
+.root[data-world="home"] .rim {
   display: block;
 }
 
@@ -163,7 +166,9 @@
 .root[data-world="work"][data-phase="hold"] .edge,
 .root[data-world="work"][data-phase="reveal"] .edge,
 .root[data-world="photos"][data-phase="hold"] .edge,
-.root[data-world="photos"][data-phase="reveal"] .edge {
+.root[data-world="photos"][data-phase="reveal"] .edge,
+.root[data-world="home"][data-phase="hold"] .edge,
+.root[data-world="home"][data-phase="reveal"] .edge {
   opacity: 1;
 }
 .root[data-world="life"][data-phase="hold"] .edge,

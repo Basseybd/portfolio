@@ -51,6 +51,12 @@
   html {
     scrollbar-color: #8d9398 #e3e4e2;
   }
+  /* Nothing on this site teleports: in-page links glide to their section. */
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
 }
 
 /* The intro only exists on a session's first page load (see app/layout.tsx). */

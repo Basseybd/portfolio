@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from "next";
-import Link from "next/link";
 import CutIn from "@/components/CutIn";
 import Footer, { footerLinks } from "@/components/Footer";
 import LifeFeed from "@/components/LifeFeed";
@@ -32,9 +31,9 @@ export default function LifePage() {
     <div className="life-page on-dark min-h-svh overflow-x-clip bg-graphite text-rice">
       <header className="sticky top-0 z-30 bg-graphite">
         <div className="page flex h-16 items-center justify-between">
-        <Link href="/" className="font-display text-[1.3rem] font-medium tracking-[-0.01em]">
+        <WorldLink href="/" world="home" className="font-display text-[1.3rem] font-medium tracking-[-0.01em]">
           {site.name}
-        </Link>
+        </WorldLink>
         <nav aria-label="Main">
           <ul className="flex items-center gap-5 text-[0.95rem] sm:gap-7">
             <li>
