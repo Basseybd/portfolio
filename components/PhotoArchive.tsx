@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Lightbox from "@/components/Lightbox";
+import { useReveal } from "@/components/useReveal";
 import { photoCategories, photoSrc, photoSrcSet, type Photo, type PhotoCategory } from "@/lib/content";
 
 type Filter = "All" | PhotoCategory;
@@ -51,45 +52,9 @@ export default function PhotoArchive({ photos }: { photos: Photo[] }) {
   );
   const close = useCallback(() => view(null), [view]);
 
-  // A block in each photo's own color wipes off as it scrolls in. Photos already
-  // on screen at load stay put; a filter change wipes in what it brings into view.
+  // A block in each photo's own color wipes off as it scrolls in.
   const grid = useRef<HTMLUListElement>(null);
-  const loaded = useRef(false);
-  useEffect(() => {
-    const ul = grid.current;
-    if (!ul || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    let k = 0;
-    const play = (el: HTMLElement) => {
-      el.style.setProperty("--rv-delay", `${Math.min(k++, 5) * 90}ms`);
-      el.dataset.rv = "in";
-    };
-    const io = new IntersectionObserver(
-      (entries) => {
-        k = 0;
-        for (const e of entries) {
-          if (!e.isIntersecting) continue;
-          play(e.target as HTMLElement);
-          io.unobserve(e.target);
-        }
-      },
-      { threshold: 0.15 },
-    );
-    for (const el of Array.from(ul.querySelectorAll<HTMLElement>("li"))) {
-      if (el.dataset.rv === "in" || el.dataset.rv === "done") continue;
-      const r = el.getBoundingClientRect();
-      if (r.top < window.innerHeight && r.bottom > 0) {
-        if (loaded.current) {
-          el.dataset.rv = "armed";
-          requestAnimationFrame(() => requestAnimationFrame(() => play(el)));
-        } else el.dataset.rv = "done";
-        continue;
-      }
-      el.dataset.rv = "armed";
-      io.observe(el);
-    }
-    loaded.current = true;
-    return () => io.disconnect();
-  }, [shown]);
+  useReveal(grid, shown);
 
   const filters: Filter[] = ["All", ...photoCategories];
 

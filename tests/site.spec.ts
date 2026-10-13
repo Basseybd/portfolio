@@ -61,14 +61,19 @@ test("/life links to OTL and the booking email", async ({ page }) => {
   await expect(page.getByRole("link", { name: "Book a shoot" })).toHaveAttribute("href", /^mailto:/);
 });
 
-test("/life photo stack ends on a way into the full set", async ({ page }) => {
+test("/life favorites end on a way into the full set", async ({ page }, info) => {
   await page.goto("/life", { waitUntil: "networkidle" });
-  const stack = page.locator(".life-stack");
-  await expect(stack.getByText("That’s me")).toBeVisible();
-  // Scroll to the stack's last stop.
-  await page.evaluate(() => {
-    const s = document.querySelector(".life-stack > div") as HTMLElement;
-    window.scrollTo(0, s.getBoundingClientRect().top + window.scrollY + s.offsetHeight - window.innerHeight);
-  });
-  await expect(stack.getByRole("link", { name: /^See all \d+ photos$/ })).toHaveAttribute("href", "/photos");
+  // Phones scroll a plain feed; wide screens get the pinned stack.
+  const phone = info.project.name === "phone";
+  const box = page.locator(phone ? ".life-feed" : ".life-stack");
+  await expect(page.locator(phone ? ".life-stack" : ".life-feed")).toBeHidden();
+  await expect(box.getByText("That’s me")).toBeVisible();
+  if (!phone) {
+    // Scroll to the stack's last stop.
+    await page.evaluate(() => {
+      const s = document.querySelector(".life-stack > div") as HTMLElement;
+      window.scrollTo(0, s.getBoundingClientRect().top + window.scrollY + s.offsetHeight - window.innerHeight);
+    });
+  }
+  await expect(box.getByRole("link", { name: /^See all \d+ photos$/ })).toHaveAttribute("href", "/photos");
 });

@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import Link from "next/link";
 import CutIn from "@/components/CutIn";
 import Footer, { footerLinks } from "@/components/Footer";
+import LifeFeed from "@/components/LifeFeed";
 import PhotoStack from "@/components/PhotoStack";
 import PrintDeck from "@/components/PrintDeck";
 import { WorldLink } from "@/components/transition/WorldTransition";
@@ -25,6 +26,7 @@ export const viewport: Viewport = {
 export default function LifePage() {
   // His portrait first, then the favorites in their set order (see lib/content.ts).
   const featured = [life.me, ...favorites];
+  const seeAll = { href: "/photos", label: `See all ${photos.length} photos` };
   const mail = `mailto:${site.email}?subject=${encodeURIComponent(life.bookingSubject)}`;
   return (
     <div className="life-page on-dark min-h-svh overflow-x-clip bg-graphite text-rice">
@@ -61,7 +63,7 @@ export default function LifePage() {
       </header>
 
       {/* Bio on the left, pinned on wide screens; the favorites stack up on the right as you scroll.
-          Phones get the bio first, then the photos. */}
+          Phones get the bio first, then the photos as a plain feed. */}
       <main id="main" className="page grid pb-24 pt-8 sm:pt-12 lg:grid-cols-12 lg:gap-x-12 lg:pb-0 lg:pt-0">
         <div className="lg:sticky lg:top-16 lg:col-span-5 lg:flex lg:h-[calc(100svh-4rem)] lg:flex-col lg:justify-center lg:self-start lg:py-16">
           <h1 className="font-display text-[clamp(3.1rem,9vw,5.2rem)] font-medium leading-[0.98] tracking-[-0.025em]">
@@ -122,10 +124,13 @@ export default function LifePage() {
 
         <div className="mt-14 lg:col-span-7 lg:mt-0">
           <noscript>
-            <style>{`.life-stack{display:none}.life-deck-alt{display:block}`}</style>
+            <style>{`@media (min-width:1024px){.life-stack{display:none}.life-deck-alt{display:block}}`}</style>
           </noscript>
+          <div className="life-feed">
+            <LifeFeed photos={featured} seeAll={seeAll} />
+          </div>
           <div className="life-stack">
-            <PhotoStack photos={featured} seeAll={{ href: "/photos", label: `See all ${photos.length} photos` }} />
+            <PhotoStack photos={featured} seeAll={seeAll} />
           </div>
           <div className="life-deck-alt lg:py-24">
             <PrintDeck photos={featured} />

@@ -136,7 +136,7 @@ html[data-world-transition="hold"] .cut-word > span {
   }
 }
 
-/* /life photo stack. Reduced motion and no-JS visitors get the print deck instead. */
+/* /life photo stack (wide screens). Reduced motion and no-JS visitors get the print deck instead. */
 .stack-hint svg {
   animation: stack-nudge 2s cubic-bezier(0.16, 1, 0.3, 1) infinite;
 }
@@ -149,10 +149,21 @@ html[data-world-transition="hold"] .cut-word > span {
     transform: translateY(5px);
   }
 }
+/* Phones and tablets get a plain feed that scrolls like any page. Wide screens
+   get the pinned stack, or the print deck under reduced motion. */
+.life-stack,
 .life-deck-alt {
   display: none;
 }
-@media (prefers-reduced-motion: reduce) {
+@media (min-width: 1024px) {
+  .life-feed {
+    display: none;
+  }
+  .life-stack {
+    display: block;
+  }
+}
+@media (min-width: 1024px) and (prefers-reduced-motion: reduce) {
   .life-stack {
     display: none;
   }
