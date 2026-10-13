@@ -51,6 +51,9 @@
 .root[data-world="life"] .back {
   background: linear-gradient(180deg, var(--wt-tint) 0%, var(--wt-tint-deep) 100%);
 }
+.root[data-world="photos"] .back {
+  background: linear-gradient(180deg, #d4d7da 0%, #a7abaf 100%);
+}
 
 .field,
 .rim {
@@ -82,7 +85,12 @@
   background: radial-gradient(140% 110% at var(--wt-x) var(--wt-y), var(--wt-light) 0%, var(--wt-color) 42%, var(--wt-deep) 100%);
 }
 
-/* The polished rim on the leading edge of the work flood. */
+/* Photos: the pale silver of the archive's own ground, lit where you touched. */
+.root[data-world="photos"] .field {
+  background: radial-gradient(140% 110% at var(--wt-x) var(--wt-y), #f6f7f6 0%, #e3e4e2 46%, #cfd2d4 100%);
+}
+
+/* The polished rim on the leading edge of the work and photos floods. */
 .rim {
   display: none;
   background: conic-gradient(
@@ -100,7 +108,8 @@
     #6e7378
   );
 }
-.root[data-world="work"] .rim {
+.root[data-world="work"] .rim,
+.root[data-world="photos"] .rim {
   display: block;
 }
 
@@ -152,7 +161,9 @@
   );
 }
 .root[data-world="work"][data-phase="hold"] .edge,
-.root[data-world="work"][data-phase="reveal"] .edge {
+.root[data-world="work"][data-phase="reveal"] .edge,
+.root[data-world="photos"][data-phase="hold"] .edge,
+.root[data-world="photos"][data-phase="reveal"] .edge {
   opacity: 1;
 }
 .root[data-world="life"][data-phase="hold"] .edge,

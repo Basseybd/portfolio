@@ -43,9 +43,9 @@ export default function LifePage() {
               </WorldLink>
             </li>
             <li>
-              <Link href="/photos" className="text-silver transition-colors duration-200 hover:text-rice">
+              <WorldLink href="/photos" world="photos" className="text-silver transition-colors duration-200 hover:text-rice">
                 Photos
-              </Link>
+              </WorldLink>
             </li>
             <li>
               <a
@@ -74,9 +74,9 @@ export default function LifePage() {
           <p className="mt-3 max-w-[30rem] text-[1.0625rem] leading-relaxed text-silver">{life.body}</p>
           <div className="mt-8">
           <div className="flex flex-wrap gap-3">
-            <Link href="/photos" className="btn-chrome px-6 py-3.5 text-[1rem] font-medium">
-              See all {photos.length} photos
-            </Link>
+            <WorldLink href={seeAll.href} world="photos" className="btn-chrome px-6 py-3.5 text-[1rem] font-medium">
+              {seeAll.label}
+            </WorldLink>
             <a
               href={site.photoArchive}
               target="_blank"

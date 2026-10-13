@@ -1,28 +1,26 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import CutIn from "@/components/CutIn";
 import Lightbox from "@/components/Lightbox";
+import { WorldLink } from "@/components/transition/WorldTransition";
 import { photoSrc, photoSrcSet, type Photo } from "@/lib/content";
 
-// The favorites as a stack of flat prints, on wide screens (phones get LifeFeed). Scrolling the page lays the next one
-// down: a band in that photo's own color rises from the bottom, the photo wipes
-// in behind it, and the one underneath settles back into the dark. It reads
-// page scroll and never takes it over; transforms and opacity only.
+// The favorites as a stack of flat prints, on wide screens (phones get LifeFeed).
+// Scroll picks the photo; the change itself plays on its own clock and always
+// finishes, so the stack never rests halfway between two photos. A band in the
+// next photo's own color rises from the bottom, the photo wipes in behind it,
+// and the one underneath settles back into the dark. It reads page scroll and
+// never takes it over; transforms and opacity only.
 
 const PER = 0.36; // scroll per photo, in screen heights
-const EASE = 0.16; // share of the remaining distance closed each frame
+const NUDGE = 0.3; // share of that scroll that moves on to the next photo, or back
+const STEP_MS = 1000; // one photo to the next
 const LEAD = 0.2; // how far the color band runs ahead of the photo
 
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
-// Each photo rests for a moment at either end of its stretch, so they land one
-// at a time, but most of every scroll still moves something.
-const hold = (p: number) => {
-  const i = Math.floor(p);
-  const t = clamp((p - i - 0.12) / 0.76, 0, 1);
-  return i + t * t * (3 - 2 * t);
-};
+// Same curve as the /photos color blocks: a gentle start, a long soft landing.
+const ease = (k: number) => (k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2);
 
 type SeeAll = { href: string; label: string };
 
@@ -59,8 +57,11 @@ export default function PhotoStack({ photos, seeAll }: { photos: Photo[]; seeAll
 
   useEffect(() => {
     if (!cardH) return;
-    let pos = -1;
-    let target = 0;
+    let pos = 0; // what's drawn, in photos
+    let from = 0;
+    let to = 0; // the photo scroll has picked
+    let start = 0;
+    let dur = 0;
     let raf = 0;
 
     // The hint's letters break apart and drift off over the first half stop of scroll.
@@ -80,18 +81,19 @@ export default function PhotoStack({ photos, seeAll }: { photos: Photo[]; seeAll
       if (arrow) arrow.style.opacity = String(1 - Math.min(1, k * 2));
     };
 
-    const read = () => {
+    // Move on once a little way into the next photo's stretch, and back once a
+    // little way into the last one's, so it never flickers at a boundary.
+    const pick = () => {
       const r = section.current?.getBoundingClientRect();
-      if (!r) return 0;
-      const raw = (pinTop() - r.top) / (window.innerHeight * PER);
+      if (!r) return to;
+      const raw = clamp((pinTop() - r.top) / (window.innerHeight * PER), 0, n - 1);
       scatter(clamp(raw / 0.55, 0, 1));
-      return hold(clamp(raw, 0, n - 1));
+      if (raw > to + NUDGE) return Math.min(n - 1, Math.floor(raw + 1 - NUDGE));
+      if (raw < to - NUDGE) return Math.max(0, Math.ceil(raw - 1 + NUDGE));
+      return to;
     };
 
-    const draw = () => {
-      raf = 0;
-      pos = pos < 0 ? target : pos + (target - pos) * EASE;
-      if (Math.abs(target - pos) < 0.001) pos = target;
+    const paint = () => {
       for (let i = 0; i < n; i++) {
         const card = cards.current[i];
         if (!card) continue;
@@ -112,16 +114,33 @@ export default function PhotoStack({ photos, seeAll }: { photos: Photo[]; seeAll
         shade.style.opacity = String(out * 0.6);
       }
       setFront(clamp(Math.round(pos), 0, n - 1));
-      if (pos !== target) raf = requestAnimationFrame(draw);
+    };
+
+    const draw = (now: number) => {
+      raf = 0;
+      const k = dur ? clamp((now - start) / dur, 0, 1) : 1;
+      pos = from + (to - from) * ease(k);
+      paint();
+      if (k < 1) raf = requestAnimationFrame(draw);
     };
 
     const onScroll = () => {
-      target = read();
+      const next = pick();
+      if (next === to) return;
+      // A change of mind mid-move starts from wherever the stack is now.
+      from = pos;
+      to = next;
+      start = performance.now();
+      dur = STEP_MS * (0.75 + 0.25 * Math.min(Math.abs(to - from), 3));
       if (!raf) raf = requestAnimationFrame(draw);
     };
 
-    target = read();
-    draw();
+    // Arriving mid-section (a reload, a back button) starts on that photo, no animation.
+    const r0 = section.current?.getBoundingClientRect().top ?? 0;
+    to = Math.round(clamp((pinTop() - r0) / (window.innerHeight * PER), 0, n - 1));
+    pos = from = to;
+    pick();
+    paint();
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onScroll);
     return () => {
@@ -240,12 +259,13 @@ export default function PhotoStack({ photos, seeAll }: { photos: Photo[]; seeAll
             </span>
             {/* At the last print, Next becomes the way into the full set. */}
             {last && seeAll ? (
-              <Link
+              <WorldLink
                 href={seeAll.href}
+                world="photos"
                 className="link flex min-h-11 items-center px-1 text-[0.95rem] font-medium text-rice decoration-rice/50 hover:decoration-rice"
               >
                 {seeAll.label}
-              </Link>
+              </WorldLink>
             ) : (
               <button
                 type="button"
