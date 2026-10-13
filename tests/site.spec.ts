@@ -60,3 +60,15 @@ test("/life links to OTL and the booking email", async ({ page }) => {
   await expect(page.getByRole("link", { name: "See what’s next" })).toHaveAttribute("href", "https://otl-kappa.vercel.app");
   await expect(page.getByRole("link", { name: "Book a shoot" })).toHaveAttribute("href", /^mailto:/);
 });
+
+test("/life photo stack ends on a way into the full set", async ({ page }) => {
+  await page.goto("/life", { waitUntil: "networkidle" });
+  const stack = page.locator(".life-stack");
+  await expect(stack.getByText("That’s me")).toBeVisible();
+  // Scroll to the stack's last stop.
+  await page.evaluate(() => {
+    const s = document.querySelector(".life-stack > div") as HTMLElement;
+    window.scrollTo(0, s.getBoundingClientRect().top + window.scrollY + s.offsetHeight - window.innerHeight);
+  });
+  await expect(stack.getByRole("link", { name: /^See all \d+ photos$/ })).toHaveAttribute("href", "/photos");
+});

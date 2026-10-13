@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import Link from "next/link";
 import CutIn from "@/components/CutIn";
 import Footer, { footerLinks } from "@/components/Footer";
-import PhotoDrum from "@/components/PhotoDrum";
+import PhotoStack from "@/components/PhotoStack";
 import PrintDeck from "@/components/PrintDeck";
 import { WorldLink } from "@/components/transition/WorldTransition";
 import { favorites, life, photos, site } from "@/lib/content";
@@ -60,7 +60,7 @@ export default function LifePage() {
         </div>
       </header>
 
-      {/* Bio on the left, pinned on wide screens; the favorites roll past on the right as you scroll.
+      {/* Bio on the left, pinned on wide screens; the favorites stack up on the right as you scroll.
           Phones get the bio first, then the photos. */}
       <main id="main" className="page grid pb-24 pt-8 sm:pt-12 lg:grid-cols-12 lg:gap-x-12 lg:pb-0 lg:pt-0">
         <div className="lg:sticky lg:top-16 lg:col-span-5 lg:flex lg:h-[calc(100svh-4rem)] lg:flex-col lg:justify-center lg:self-start lg:py-16">
@@ -105,7 +105,7 @@ export default function LifePage() {
           </p>
           </div>
           {/* Wide, tall-enough screens: the footer lives here, pinned with the bio, so the links
-              stay in reach while the photos roll. Phones and short laptops get the footer at the end. */}
+              stay in reach while the photos change. Phones and short laptops get the footer at the end. */}
           <div className="absolute bottom-7 left-0 hidden items-center gap-x-6 text-[0.9rem] text-silver lg:[@media(min-height:800px)]:flex">
             <p>&copy; {new Date().getFullYear()} Bassey Duke</p>
             <ul className="flex gap-x-6">
@@ -122,10 +122,10 @@ export default function LifePage() {
 
         <div className="mt-14 lg:col-span-7 lg:mt-0">
           <noscript>
-            <style>{`.life-drum{display:none}.life-deck-alt{display:block}`}</style>
+            <style>{`.life-stack{display:none}.life-deck-alt{display:block}`}</style>
           </noscript>
-          <div className="life-drum">
-            <PhotoDrum photos={featured} />
+          <div className="life-stack">
+            <PhotoStack photos={featured} seeAll={{ href: "/photos", label: `See all ${photos.length} photos` }} />
           </div>
           <div className="life-deck-alt lg:py-24">
             <PrintDeck photos={featured} />
