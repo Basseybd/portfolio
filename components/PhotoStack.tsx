@@ -15,8 +15,8 @@ import { photoSrc, photoSrcSet, type Photo } from "@/lib/content";
 // drifts gently inside its frame and a hairline fills with your progress, so
 // every bit of scroll shows, but nothing ever rests halfway.
 
-const PER = 0.36; // scroll per photo, in screen heights
-const NUDGE = 0.22; // share of that scroll that moves on to the next photo, or back (about one wheel notch)
+const PER = 0.3; // scroll per photo, in screen heights
+const HYS = 0.1; // dead zone either side of the halfway point, so a photo never flickers at a boundary
 const DRIFT = 5; // how far the photo drifts inside its frame as you scroll, in % of its height
 const STEP_MS = 1000; // one photo to the next
 const LEAD = 0.2; // how far the color band runs ahead of the photo
@@ -29,38 +29,26 @@ type SeeAll = { href: string; label: string };
 
 export default function PhotoStack({ photos, seeAll }: { photos: Photo[]; seeAll?: SeeAll }) {
   const section = useRef<HTMLDivElement>(null);
-  const stage = useRef<HTMLDivElement>(null);
   const pin = useRef<HTMLDivElement>(null);
   const hint = useRef<HTMLDivElement>(null);
   const bar = useRef<HTMLDivElement>(null);
   const cards = useRef<(HTMLButtonElement | null)[]>([]);
-  const [size, setSize] = useState({ w: 0, h: 0 });
+  const [ready, setReady] = useState(false);
   const [front, setFront] = useState(0);
   const [viewing, setViewing] = useState<number | null>(null);
   const n = photos.length;
   // Where the stage pins: just under the sticky header.
   const pinTop = () => (pin.current ? parseFloat(getComputedStyle(pin.current).top) || 0 : 0);
 
-  // Sized for a 2:3 print; a wider photo gets shorter instead of making every print smaller.
-  const cardH = size.h ? Math.min(size.h * 0.8, size.w / (2 / 3)) : 0;
-  const dims = (p: Photo) => {
+  // Prints are sized in CSS against the stage (container units), so they're on
+  // the page from the first paint: 80% of its height, or its full width if
+  // that's smaller. A wider photo gets shorter instead of shrinking the rest.
+  const box = (p: Photo) => {
     const r = p.width / p.height;
-    const h = Math.min(cardH, size.w / r);
-    return { w: h * r, h };
+    return { width: `min(${(80 * r).toFixed(3)}cqh, 100cqw)`, height: `min(80cqh, ${(100 / r).toFixed(3)}cqw)` };
   };
 
   useEffect(() => {
-    const el = stage.current;
-    if (!el) return;
-    const read = () => setSize({ w: el.clientWidth, h: el.clientHeight });
-    read();
-    const ro = new ResizeObserver(read);
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, []);
-
-  useEffect(() => {
-    if (!cardH) return;
     let pos = 0; // what's drawn, in photos
     let from = 0;
     let to = 0; // the photo scroll has picked
@@ -68,6 +56,12 @@ export default function PhotoStack({ photos, seeAll }: { photos: Photo[]; seeAll
     let dur = 0;
     let raf = 0;
     let raw = 0; // where the scroll is, in photos
+    // Until the visitor touches anything, scroll comes from the browser putting
+    // them back where they were (a refresh, the back button): jump straight there.
+    let moved = false;
+    const touched = () => {
+      moved = true;
+    };
 
     // The hint's letters break apart and drift off over the first half stop of scroll.
     const letters = Array.from(hint.current?.querySelectorAll<HTMLElement>("[data-l]") ?? []);
@@ -86,16 +80,15 @@ export default function PhotoStack({ photos, seeAll }: { photos: Photo[]; seeAll
       if (arrow) arrow.style.opacity = String(1 - Math.min(1, k * 2));
     };
 
-    // Move on once a little way into the next photo's stretch, and back once a
-    // little way into the last one's, so it never flickers at a boundary.
+    // Each photo owns its own stretch of scroll; you move on once you're past
+    // halfway to the next one (and back the same way), with a small dead zone
+    // either side so it never flickers at the boundary.
     const pick = () => {
       const r = section.current?.getBoundingClientRect();
       if (!r) return to;
       raw = clamp((pinTop() - r.top) / (window.innerHeight * PER), 0, n - 1);
       scatter(clamp(raw / 0.55, 0, 1));
-      if (raw > to + NUDGE) return Math.min(n - 1, Math.floor(raw + 1 - NUDGE));
-      if (raw < to - NUDGE) return Math.max(0, Math.ceil(raw - 1 + NUDGE));
-      return to;
+      return Math.abs(raw - to) > 0.5 + HYS ? Math.round(raw) : to;
     };
 
     const paint = () => {
@@ -134,7 +127,13 @@ export default function PhotoStack({ photos, seeAll }: { photos: Photo[]; seeAll
     const onScroll = () => {
       const next = pick();
       if (bar.current) bar.current.style.transform = `scaleX(${n > 1 ? raw / (n - 1) : 1})`;
-      if (next === to) {
+      if (!moved) {
+        // The browser putting you back: land on that photo, whatever the stack
+        // guessed before the scroll arrived.
+        pos = from = to = Math.round(raw);
+        dur = 0;
+      }
+      if (next === to || !moved) {
         if (!raf) raf = requestAnimationFrame(draw);
         return;
       }
@@ -146,21 +145,27 @@ export default function PhotoStack({ photos, seeAll }: { photos: Photo[]; seeAll
       if (!raf) raf = requestAnimationFrame(draw);
     };
 
-    // Arriving mid-section (a reload, a back button) starts on that photo, no animation.
+    // Arriving mid-section (a reload, the back button) starts on that photo with
+    // no animation; then the stack fades in.
     const r0 = section.current?.getBoundingClientRect().top ?? 0;
-    to = Math.round(clamp((pinTop() - r0) / (window.innerHeight * PER), 0, n - 1));
+    raw = clamp((pinTop() - r0) / (window.innerHeight * PER), 0, n - 1);
+    to = Math.round(raw);
     pos = from = to;
     pick();
     if (bar.current) bar.current.style.transform = `scaleX(${n > 1 ? raw / (n - 1) : 1})`;
     paint();
+    setReady(true);
+    const inputs = ["wheel", "touchstart", "keydown", "pointerdown"] as const;
+    inputs.forEach((e) => window.addEventListener(e, touched, { passive: true }));
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onScroll);
     return () => {
+      inputs.forEach((e) => window.removeEventListener(e, touched));
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
       cancelAnimationFrame(raf);
     };
-  }, [cardH, n]);
+  }, [n]);
 
   // Previous and Next scroll the page to that photo's stop, so scroll stays the only driver.
   const go = (i: number) => {
@@ -176,11 +181,14 @@ export default function PhotoStack({ photos, seeAll }: { photos: Photo[]; seeAll
 
   return (
     <div ref={section} style={{ height: `calc(100svh - 4rem + ${(n - 1) * PER * 100}svh)` }}>
-      <div ref={pin} className="sticky top-16 h-[calc(100svh-4rem)]">
-        <div ref={stage} className="absolute inset-x-0 top-0 bottom-[6.5rem] overflow-hidden">
-          {cardH > 0 &&
-            photos.map((p, i) => {
-              const { w, h } = dims(p);
+      {/* Fades in once it knows which photo you're on, so nothing pops. */}
+      <div
+        ref={pin}
+        className="sticky top-16 h-[calc(100svh-4rem)]"
+        style={{ opacity: ready ? 1 : 0, transition: "opacity 700ms cubic-bezier(0.23, 1, 0.32, 1)" }}
+      >
+        <div className="absolute inset-x-0 top-0 bottom-[6.5rem] overflow-hidden [container-type:size]">
+          {photos.map((p, i) => {
               const isFront = i === front;
               return (
                 <button
@@ -193,12 +201,9 @@ export default function PhotoStack({ photos, seeAll }: { photos: Photo[]; seeAll
                   aria-hidden={!isFront}
                   aria-label={`View larger: ${p.title}`}
                   onClick={() => setViewing(i)}
-                  className="absolute left-1/2 top-1/2 block cursor-zoom-in overflow-hidden"
+                  className="absolute inset-0 m-auto block cursor-zoom-in overflow-hidden"
                   style={{
-                    width: w,
-                    height: h,
-                    marginLeft: -w / 2,
-                    marginTop: -h / 2,
+                    ...box(p),
                     zIndex: i + 1,
                     pointerEvents: isFront ? "auto" : "none",
                     visibility: i === 0 ? "visible" : "hidden",
@@ -215,11 +220,11 @@ export default function PhotoStack({ photos, seeAll }: { photos: Photo[]; seeAll
                       <img
                         src={photoSrc(p.slug, 1200)}
                         srcSet={photoSrcSet(p)}
-                        sizes={`${Math.round(w)}px`}
+                        sizes="(min-width: 1024px) 34vw, 1px"
                         width={p.width}
                         height={p.height}
                         alt={p.alt}
-                        loading={i < 2 ? "eager" : "lazy"}
+                        loading="lazy"
                         decoding="async"
                         draggable={false}
                         className="h-full w-full select-none object-cover"
@@ -235,7 +240,6 @@ export default function PhotoStack({ photos, seeAll }: { photos: Photo[]; seeAll
             aria-hidden
             ref={hint}
             className="stack-hint pointer-events-none absolute bottom-3 left-1/2 z-[100] flex -translate-x-1/2 flex-col items-center gap-1.5 text-[0.8rem] text-silver"
-            style={{ opacity: cardH > 0 ? 1 : 0 }}
           >
             <span className="whitespace-pre">
               {"Scroll to see more".split("").map((c, i) => (

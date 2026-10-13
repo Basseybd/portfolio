@@ -84,7 +84,7 @@ test("/life stack never rests halfway between two photos", async ({ page }, info
   // Stop the scroll halfway between the first and second photo.
   await page.evaluate(() => {
     const s = document.querySelector(".life-stack > div") as HTMLElement;
-    window.scrollTo(0, s.getBoundingClientRect().top + window.scrollY - 64 + window.innerHeight * 0.36 * 0.5);
+    window.scrollTo(0, s.getBoundingClientRect().top + window.scrollY - 64 + window.innerHeight * 0.3 * 0.5);
   });
   await page.waitForTimeout(1600);
   const shown = await page.locator(".life-stack button[aria-label^='View larger']").evaluateAll(
