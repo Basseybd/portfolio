@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import CutIn from "@/components/CutIn";
 import { photoSrc, photoSrcSet, type Photo } from "@/lib/content";
 
 type Props = {
@@ -65,7 +66,10 @@ export default function Lightbox({ photos, index, onClose, onIndex }: Props) {
         <div className="flex h-full flex-col">
           <div className="page flex h-16 shrink-0 items-center justify-between">
             <span className="label text-silver">
-              {index + 1} / {photos.length}
+              <span key={index} className="cut-word">
+                <span>{index + 1}</span>
+              </span>{" "}
+              / {photos.length}
             </span>
             <button
               type="button"
@@ -120,7 +124,9 @@ export default function Lightbox({ photos, index, onClose, onIndex }: Props) {
           </div>
 
           <div className="page flex shrink-0 flex-wrap items-baseline justify-between gap-x-6 gap-y-1 py-5">
-            <span className="font-display text-[1.15rem] font-medium">{current.title}</span>
+            <span key={current.slug} className="font-display text-[1.15rem] font-medium">
+              <CutIn lines={[current.title]} />
+            </span>
             <span className="flex gap-5 text-[0.9rem] text-silver">
               <span>{current.place}</span>
               <span className="label">{current.settings}</span>
