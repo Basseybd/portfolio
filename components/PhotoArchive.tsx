@@ -108,7 +108,7 @@ export default function PhotoArchive({ photos }: { photos: Photo[] }) {
               <figcaption className="mt-3 border-t border-ink/70 pt-2.5">
                 <div className="flex items-baseline justify-between gap-4">
                   <span className="font-display text-[1.1rem] font-medium leading-snug">{p.title}</span>
-                  <span className="shrink-0 text-[0.85rem] text-stone">{p.place}</span>
+                  <span className="max-w-[50%] text-right text-[0.85rem] leading-snug text-stone">{p.place}</span>
                 </div>
                 <p className="label mt-1 text-stone">{p.settings}</p>
               </figcaption>
