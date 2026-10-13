@@ -115,9 +115,9 @@ export default function PhotoArchive({ photos }: { photos: Photo[] }) {
         })}
       </div>
 
-      <ul ref={grid} className="mt-12 columns-1 gap-8 sm:columns-2 lg:columns-3">
+      <ul ref={grid} className="mt-12 grid items-start gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
         {shown.map((p, i) => (
-          <li key={p.slug} className="mb-12 break-inside-avoid">
+          <li key={p.slug}>
             <figure>
               <button
                 type="button"

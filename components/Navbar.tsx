@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { WorldLink } from "@/components/transition/WorldTransition";
-import { photos, site } from "@/lib/content";
+import { favorites, site } from "@/lib/content";
 
 const links = [
   { href: "/work#work", label: "Work" },
@@ -11,7 +11,7 @@ const links = [
   { href: "/work#focus", label: "Focus" },
   { href: "/work#contact", label: "Contact" },
 ];
-const lifeColor = photos.find((p) => p.featured)?.accent;
+const lifeColor = favorites[0]?.accent;
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);

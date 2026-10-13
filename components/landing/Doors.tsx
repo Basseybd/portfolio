@@ -4,10 +4,10 @@
 // Hover (or keyboard focus) widens a door, wakes its pixels and lets the other
 // recede. A click or tap goes straight in through the world transition.
 
-import { useMemo, useState, type FocusEvent, type PointerEvent } from "react";
+import { useState, type FocusEvent, type PointerEvent } from "react";
 import PixelField from "@/components/landing/PixelField";
 import { WorldLink } from "@/components/transition/WorldTransition";
-import { photos, site } from "@/lib/content";
+import { favorites, site } from "@/lib/content";
 import styles from "./Doors.module.css";
 
 type Side = "work" | "life";
@@ -26,7 +26,7 @@ export type DoorsProps = {
 };
 
 export default function Doors({ workHref = "/work", lifeHref = "/life", ready = true }: DoorsProps) {
-  const featured = useMemo(() => photos.filter((p) => p.featured), []);
+  const featured = favorites;
   const [index, setIndex] = useState(0);
   const [active, setActive] = useState<Side | null>(null);
   const current = featured[index] ?? featured[0];

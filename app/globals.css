@@ -254,6 +254,18 @@ body:has(.life-page) {
   background: #141516;
   border-color: #141516;
 }
+/* On graphite the crisp top edge and the band through the middle read as stray
+   white lines, so the dark pages get one soft silver sweep instead. */
+.on-dark .btn-chrome {
+  border-color: #c9cdd1;
+  background: linear-gradient(180deg, #eef0f1 0%, #c9cdd1 100%);
+  box-shadow: 0 6px 16px -10px rgba(0, 0, 0, 0.6);
+}
+.on-dark .btn-chrome:hover {
+  color: #17181a;
+  background: #eceeeb;
+  border-color: #eceeeb;
+}
 
 /* Brushed aluminum panel. */
 .brushed {
