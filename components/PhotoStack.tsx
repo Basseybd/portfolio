@@ -6,21 +6,21 @@ import CutIn from "@/components/CutIn";
 import Lightbox from "@/components/Lightbox";
 import { photoSrc, photoSrcSet, type Photo } from "@/lib/content";
 
-// The favorites as a stack of flat prints. Scrolling the page lays the next one
+// The favorites as a stack of flat prints, on wide screens (phones get LifeFeed). Scrolling the page lays the next one
 // down: a band in that photo's own color rises from the bottom, the photo wipes
 // in behind it, and the one underneath settles back into the dark. It reads
 // page scroll and never takes it over; transforms and opacity only.
 
-const PER = 0.42; // scroll per photo, in screen heights
+const PER = 0.36; // scroll per photo, in screen heights
 const EASE = 0.16; // share of the remaining distance closed each frame
 const LEAD = 0.2; // how far the color band runs ahead of the photo
 
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
-// Each photo rests for the first and last quarter of its stretch, so they come
-// one at a time instead of drifting.
+// Each photo rests for a moment at either end of its stretch, so they land one
+// at a time, but most of every scroll still moves something.
 const hold = (p: number) => {
   const i = Math.floor(p);
-  const t = clamp((p - i - 0.25) / 0.5, 0, 1);
+  const t = clamp((p - i - 0.12) / 0.76, 0, 1);
   return i + t * t * (3 - 2 * t);
 };
 
