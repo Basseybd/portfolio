@@ -354,14 +354,14 @@ export const photos: Photo[] = [
   },
   {
     slug: "2026-crowned",
-    accent: "#462110",
+    accent: "#5D4128",
     width: 1600,
     height: 2400,
     title: "Crowned",
     place: "2026",
     category: "Nights out",
-    settings: "f/2.0, 1/60s, ISO 500",
-    alt: "A friend in a gold crown smiling straight at the camera, long wavy hair, warm amber light",
+    settings: "f/2.0, 1/60s, ISO 200",
+    alt: "A friend in a gold crown laughs with his eyes closed, hugging a gold trophy to his cheek",
     featured: true,
   },
   {
