@@ -280,7 +280,7 @@ export const life = {
   // his work. Not in `photos`, so it stays out of /photos and its count.
   me: {
     slug: "2026-mirror",
-    accent: "#706853",
+    accent: "#A08236",
     width: 1600,
     height: 2400,
     title: "That’s me",
@@ -354,7 +354,7 @@ export const photos: Photo[] = [
   },
   {
     slug: "2026-crowned",
-    accent: "#5D4128",
+    accent: "#D28748",
     width: 1600,
     height: 2400,
     title: "Crowned",
@@ -462,7 +462,7 @@ export const photos: Photo[] = [
   },
   {
     slug: "2026-rose-window",
-    accent: "#B23A48",
+    accent: "#755E50",
     width: 1600,
     height: 2400,
     title: "Rose window",
@@ -474,7 +474,7 @@ export const photos: Photo[] = [
   },
   {
     slug: "2026-platform",
-    accent: "#81663B",
+    accent: "#A67623",
     width: 1600,
     height: 2400,
     title: "Platform",
@@ -486,7 +486,7 @@ export const photos: Photo[] = [
   },
   {
     slug: "2026-red-leather",
-    accent: "#866052",
+    accent: "#933118",
     width: 1600,
     height: 2400,
     title: "Red leather",
@@ -522,7 +522,7 @@ export const photos: Photo[] = [
   },
   {
     slug: "2026-wallpaper",
-    accent: "#A67767",
+    accent: "#E3B3A3",
     width: 1600,
     height: 2400,
     title: "Wallpaper",
@@ -558,7 +558,7 @@ export const photos: Photo[] = [
   },
   {
     slug: "2026-red-room",
-    accent: "#47180C",
+    accent: "#9B0D01",
     width: 1600,
     height: 2400,
     title: "Red room",
