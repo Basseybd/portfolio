@@ -1,3 +1,4 @@
+import CutIn from "@/components/CutIn";
 import GlyphPortrait from "@/components/GlyphPortrait";
 import { portrait, site } from "@/lib/content";
 
@@ -10,9 +11,7 @@ export default function Hero() {
             id="hero-name"
             className="font-display text-[clamp(4rem,10.5vw,7.5rem)] font-medium leading-[0.92] tracking-[-0.025em]"
           >
-            Bassey
-            <br />
-            Duke
+            <CutIn lines={["Bassey", "Duke"]} />
           </h1>
           <div aria-hidden className="chrome mt-9 h-[3px] w-full max-w-[34rem]" />
 

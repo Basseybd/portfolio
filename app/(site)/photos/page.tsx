@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import CutIn from "@/components/CutIn";
 import PhotoArchive from "@/components/PhotoArchive";
 import { photos, site } from "@/lib/content";
 
@@ -17,7 +18,7 @@ export default function PhotosPage() {
     <div className="page pb-28 pt-12 sm:pt-16">
       <header className="grid gap-6 lg:grid-cols-12 lg:gap-x-12">
         <h1 className="font-display text-[clamp(3.4rem,9vw,6.5rem)] font-medium leading-[0.95] tracking-[-0.025em] lg:col-span-6">
-          Photos
+          <CutIn lines={["Photos"]} />
         </h1>
         <div className="lg:col-span-5 lg:col-start-8 lg:pt-5">
           <p className="text-[1.125rem] leading-relaxed text-ink">

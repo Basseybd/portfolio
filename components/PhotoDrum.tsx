@@ -32,6 +32,7 @@ export default function PhotoDrum({ photos }: { photos: Photo[] }) {
   const stage = useRef<HTMLDivElement>(null);
   const wheel = useRef<HTMLDivElement>(null);
   const pin = useRef<HTMLDivElement>(null);
+  const hint = useRef<HTMLDivElement>(null);
   const cards = useRef<(HTMLButtonElement | null)[]>([]);
   const [size, setSize] = useState({ w: 0, h: 0 });
   const [front, setFront] = useState(0);
@@ -74,7 +75,26 @@ export default function PhotoDrum({ photos }: { photos: Photo[] }) {
     const read = () => {
       const r = section.current?.getBoundingClientRect();
       if (!r) return 0;
-      return hold(clamp((pinTop() - r.top) / (window.innerHeight * PER), 0, n - 1));
+      const raw = (pinTop() - r.top) / (window.innerHeight * PER);
+      scatter(clamp(raw / 0.55, 0, 1));
+      return hold(clamp(raw, 0, n - 1));
+    };
+
+    // The hint's letters break apart and drift off over the first half stop of scroll.
+    const letters = Array.from(hint.current?.querySelectorAll<HTMLElement>("[data-l]") ?? []);
+    const arrow = hint.current?.querySelector<SVGElement>("svg");
+    const scatter = (k: number) => {
+      const e = 1 - Math.pow(1 - k, 3);
+      letters.forEach((el, i) => {
+        const s = Math.sin(i * 12.9898) * 43758.5453;
+        const r1 = s - Math.floor(s);
+        const r2 = Math.abs(Math.sin(i * 78.233) * 9.7) % 1;
+        const x = (r1 - 0.5) * 90 * e;
+        const y = -(18 + r2 * 70) * e;
+        el.style.transform = `translate3d(${x}px, ${y}px, 0) rotate(${(r1 - 0.5) * 70 * e}deg)`;
+        el.style.opacity = String(1 - Math.min(1, e * 1.25));
+      });
+      if (arrow) arrow.style.opacity = String(1 - Math.min(1, k * 2));
     };
 
     const draw = () => {
@@ -165,10 +185,17 @@ export default function PhotoDrum({ photos }: { photos: Photo[] }) {
           {/* Tells people the photos turn with scroll; gone once they start. */}
           <div
             aria-hidden
-            className="drum-hint pointer-events-none absolute bottom-3 left-1/2 flex -translate-x-1/2 flex-col items-center gap-1.5 text-[0.8rem] text-silver transition-opacity duration-500"
-            style={{ opacity: front === 0 && cardH > 0 ? 1 : 0 }}
+            ref={hint}
+            className="drum-hint pointer-events-none absolute bottom-3 left-1/2 flex -translate-x-1/2 flex-col items-center gap-1.5 text-[0.8rem] text-silver"
+            style={{ opacity: cardH > 0 ? 1 : 0 }}
           >
-            <span>Scroll to see more</span>
+            <span className="whitespace-pre">
+              {"Scroll to see more".split("").map((c, i) => (
+                <span key={i} data-l className="inline-block will-change-transform">
+                  {c}
+                </span>
+              ))}
+            </span>
             <svg viewBox="0 0 14 22" className="h-[22px] w-[14px]" fill="none" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round">
               <path d="M7 1v19M1.5 14.5 7 20l5.5-5.5" />
             </svg>
