@@ -7,8 +7,8 @@ export const site = {
   role: "Senior Software Engineer",
   email: "bassey.bd@gmail.com",
   location: "New York, NY",
-  resume:
-    "https://bassey-duke-static-files.s3.us-east-2.amazonaws.com/Bassey+Duke's+Resume.pdf",
+  // Public copy: no phone number, public-safe wording. Rebuild from the resume doc when it changes.
+  resume: "/bassey-duke-resume.pdf",
   linkedin: "https://www.linkedin.com/in/basseyduke/",
   github: "https://github.com/basseybd",
   instagram: "https://www.instagram.com/bassey.bd/",
