@@ -39,3 +39,10 @@ next-env.d.ts
 /test-results/
 /playwright-report/
 /playwright/.cache/
+
+# local AI notes and settings stay on his machine
+/.claude/
+/CLAUDE.md
+/AGENTS.md
+.env*
+!.env.example
