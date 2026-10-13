@@ -45,7 +45,7 @@ export const viewport: Viewport = {
 
 // Runs before first paint. Marks the first page load of a session so the home
 // page can play its intro, and only then.
-const introScript = `(function(){var d=document.documentElement;try{if(!sessionStorage.getItem("bd-intro")){d.setAttribute("data-intro","");sessionStorage.setItem("bd-intro","1")}}catch(e){d.setAttribute("data-intro","")}})();`;
+const introScript = `(function(){var d=document.documentElement;d.setAttribute("data-js","");try{if(!sessionStorage.getItem("bd-intro")){d.setAttribute("data-intro","");sessionStorage.setItem("bd-intro","1")}}catch(e){d.setAttribute("data-intro","")}})();`;
 
 export default function RootLayout({
   children,

@@ -124,6 +124,22 @@ html:not([data-intro]) [data-preloader] {
   transform: none;
   transition: transform 1.3s cubic-bezier(0.16, 1, 0.3, 1) var(--rv-delay, 0ms);
 }
+/* Before scripts run, the photos that wipe in on opening start covered, so they
+   never flash. If scripts never arrive, the cover clears itself. */
+@media (prefers-reduced-motion: no-preference) {
+  html[data-js] [data-rv-intro] > li:not([data-rv]) .rv-block {
+    transform: scaleX(1);
+    animation: rv-safety 0s linear 4s forwards;
+  }
+  html[data-js] [data-rv-intro] > li:not([data-rv]) .rv-img {
+    transform: scale(1.08);
+  }
+}
+@keyframes rv-safety {
+  to {
+    transform: scaleX(0);
+  }
+}
 
 /* Hold the cut until a world transition has lifted off the page. */
 html[data-world-transition="cover"] .cut-word > span,

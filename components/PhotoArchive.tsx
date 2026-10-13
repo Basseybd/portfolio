@@ -52,9 +52,10 @@ export default function PhotoArchive({ photos }: { photos: Photo[] }) {
   );
   const close = useCallback(() => view(null), [view]);
 
-  // A block in each photo's own color wipes off as it scrolls in.
+  // A block in each photo's own color wipes off as it scrolls in, and over the
+  // photos on screen when the page opens.
   const grid = useRef<HTMLUListElement>(null);
-  useReveal(grid, shown);
+  useReveal(grid, shown, true);
 
   const filters: Filter[] = ["All", ...photoCategories];
 
@@ -80,7 +81,7 @@ export default function PhotoArchive({ photos }: { photos: Photo[] }) {
         })}
       </div>
 
-      <ul ref={grid} className="mt-12 grid items-start gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
+      <ul ref={grid} data-rv-intro className="mt-12 grid items-start gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
         {shown.map((p, i) => (
           <li key={p.slug}>
             <figure>
@@ -98,7 +99,7 @@ export default function PhotoArchive({ photos }: { photos: Photo[] }) {
                   width={p.width}
                   height={p.height}
                   alt={p.alt}
-                  loading={i < 3 ? "eager" : "lazy"}
+                  loading={i < 6 ? "eager" : "lazy"}
                   decoding="async"
                   className="rv-img block h-auto w-full"
                 />

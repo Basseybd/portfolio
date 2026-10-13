@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { useRef, useState } from "react";
 import Lightbox from "@/components/Lightbox";
+import { WorldLink } from "@/components/transition/WorldTransition";
 import { useReveal } from "@/components/useReveal";
 import { photoSrc, photoSrcSet, type Photo } from "@/lib/content";
 
@@ -52,9 +52,9 @@ export default function LifeFeed({ photos, seeAll }: { photos: Photo[]; seeAll?:
         ))}
       </ul>
       {seeAll ? (
-        <Link href={seeAll.href} className="btn-chrome mt-12 inline-block px-6 py-3.5 text-[1rem] font-medium">
+        <WorldLink href={seeAll.href} world="photos" className="btn-chrome mt-12 inline-block px-6 py-3.5 text-[1rem] font-medium">
           {seeAll.label}
-        </Link>
+        </WorldLink>
       ) : null}
       <Lightbox photos={photos} index={viewing} onClose={() => setViewing(null)} onIndex={setViewing} />
     </>
