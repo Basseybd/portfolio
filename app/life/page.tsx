@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import Link from "next/link";
+import CutIn from "@/components/CutIn";
 import Footer, { footerLinks } from "@/components/Footer";
 import PhotoDrum from "@/components/PhotoDrum";
 import PrintDeck from "@/components/PrintDeck";
@@ -64,7 +65,7 @@ export default function LifePage() {
       <main id="main" className="page grid pb-24 pt-8 sm:pt-12 lg:grid-cols-12 lg:gap-x-12 lg:pb-0 lg:pt-0">
         <div className="lg:sticky lg:top-16 lg:col-span-5 lg:flex lg:h-[calc(100svh-4rem)] lg:flex-col lg:justify-center lg:self-start lg:py-16">
           <h1 className="font-display text-[clamp(3.1rem,9vw,5.2rem)] font-medium leading-[0.98] tracking-[-0.025em]">
-            {life.hello}
+            <CutIn lines={[life.hello]} />
           </h1>
           <div aria-hidden className="chrome mt-7 h-[2px] w-24" />
           <p className="mt-6 max-w-[30rem] text-[1.1875rem] leading-relaxed text-rice">{life.lead}</p>

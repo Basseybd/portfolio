@@ -72,6 +72,39 @@ html:not([data-intro]) [data-preloader] {
     display: none;
   }
 }
+/* Kinetic type: each word cuts up out of its own slot, one after another. */
+.cut-word {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: top;
+  /* Room for descenders (the y in Bassey) without moving the line. */
+  padding-bottom: 0.24em;
+  margin-bottom: -0.24em;
+}
+.cut-word > span {
+  display: inline-block;
+  animation: cut-in 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: calc(var(--i, 0) * 85ms + 120ms);
+}
+@keyframes cut-in {
+  from {
+    transform: translate3d(0, 110%, 0) skewY(6deg);
+  }
+  to {
+    transform: none;
+  }
+}
+/* Hold the cut until a world transition has lifted off the page. */
+html[data-world-transition="cover"] .cut-word > span,
+html[data-world-transition="hold"] .cut-word > span {
+  animation-play-state: paused;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cut-word > span {
+    animation: none;
+  }
+}
+
 /* /life photo drum. Reduced motion and no-JS visitors get the print deck instead. */
 .drum-hint svg {
   animation: drum-nudge 2s cubic-bezier(0.16, 1, 0.3, 1) infinite;
