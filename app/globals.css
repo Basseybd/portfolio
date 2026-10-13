@@ -136,11 +136,11 @@ html[data-world-transition="hold"] .cut-word > span {
   }
 }
 
-/* /life photo drum. Reduced motion and no-JS visitors get the print deck instead. */
-.drum-hint svg {
-  animation: drum-nudge 2s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+/* /life photo stack. Reduced motion and no-JS visitors get the print deck instead. */
+.stack-hint svg {
+  animation: stack-nudge 2s cubic-bezier(0.16, 1, 0.3, 1) infinite;
 }
-@keyframes drum-nudge {
+@keyframes stack-nudge {
   0%,
   100% {
     transform: translateY(0);
@@ -153,7 +153,7 @@ html[data-world-transition="hold"] .cut-word > span {
   display: none;
 }
 @media (prefers-reduced-motion: reduce) {
-  .life-drum {
+  .life-stack {
     display: none;
   }
   .life-deck-alt {

@@ -276,7 +276,7 @@ export const offTheClock = {
 // /life: quick and short.
 export const life = {
   hello: "Hey, I’m Bassey.",
-  // First card on the /life drum, captioned as him, so everything after reads as
+  // First print on the /life stack, captioned as him, so everything after reads as
   // his work. Not in `photos`, so it stays out of /photos and its count.
   me: {
     slug: "2026-mirror",

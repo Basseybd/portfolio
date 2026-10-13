@@ -1,37 +1,34 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import CutIn from "@/components/CutIn";
 import Lightbox from "@/components/Lightbox";
 import { photoSrc, photoSrcSet, type Photo } from "@/lib/content";
 
-// The favorites on a drum seen side on. Scrolling the page turns it: each photo
-// holds at the front, then rolls down and away as the next one comes over the
-// top. Adapted from a 21st.dev works wheel, drum only. It reads page scroll and
-// never takes it over; transforms only.
+// The favorites as a stack of flat prints. Scrolling the page lays the next one
+// down: a band in that photo's own color rises from the bottom, the photo wipes
+// in behind it, and the one underneath settles back into the dark. It reads
+// page scroll and never takes it over; transforms and opacity only.
 
-const STEP = 40; // degrees between photos on the drum
-const DRUM = 2.22; // drum radius, in card heights
-const LENS = 2.7; // perspective distance, in card heights
-const BOW = 1.3; // the strip curves away to the right, in card heights
-const CULL = 1.6; // photos either side of the front still drawn
 const PER = 0.42; // scroll per photo, in screen heights
 const EASE = 0.16; // share of the remaining distance closed each frame
+const LEAD = 0.2; // how far the color band runs ahead of the photo
 
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
-const rad = (deg: number) => (deg * Math.PI) / 180;
-// Each photo rests at the front for the first and last quarter of its stretch,
-// so they come round one at a time instead of drifting.
+// Each photo rests for the first and last quarter of its stretch, so they come
+// one at a time instead of drifting.
 const hold = (p: number) => {
   const i = Math.floor(p);
   const t = clamp((p - i - 0.25) / 0.5, 0, 1);
   return i + t * t * (3 - 2 * t);
 };
 
-export default function PhotoDrum({ photos }: { photos: Photo[] }) {
+type SeeAll = { href: string; label: string };
+
+export default function PhotoStack({ photos, seeAll }: { photos: Photo[]; seeAll?: SeeAll }) {
   const section = useRef<HTMLDivElement>(null);
   const stage = useRef<HTMLDivElement>(null);
-  const wheel = useRef<HTMLDivElement>(null);
   const pin = useRef<HTMLDivElement>(null);
   const hint = useRef<HTMLDivElement>(null);
   const cards = useRef<(HTMLButtonElement | null)[]>([]);
@@ -42,17 +39,13 @@ export default function PhotoDrum({ photos }: { photos: Photo[] }) {
   // Where the stage pins: just under the sticky header.
   const pinTop = () => (pin.current ? parseFloat(getComputedStyle(pin.current).top) || 0 : 0);
 
-  // Sized for a 2:3 print; a wider photo (the square portrait, a landscape) gets
-  // shorter instead of making every card smaller.
-  const maxW = size.w * 0.84;
-  const cardH = size.h ? Math.min(size.h * 0.62, maxW / (2 / 3)) : 0;
+  // Sized for a 2:3 print; a wider photo gets shorter instead of making every print smaller.
+  const cardH = size.h ? Math.min(size.h * 0.8, size.w / (2 / 3)) : 0;
   const dims = (p: Photo) => {
     const r = p.width / p.height;
-    const h = Math.min(cardH, maxW / r);
+    const h = Math.min(cardH, size.w / r);
     return { w: h * r, h };
   };
-  const drumR = cardH * DRUM;
-  const bow = cardH * BOW * clamp(size.w / 700, 0.45, 1);
 
   useEffect(() => {
     const el = stage.current;
@@ -68,18 +61,7 @@ export default function PhotoDrum({ photos }: { photos: Photo[] }) {
     if (!cardH) return;
     let pos = -1;
     let target = 0;
-    // On phones the finger pushes the page up, so the drum rolls up with it: the
-    // next photo comes from below. On wide screens it rolls down from the top.
-    const dir = window.matchMedia("(max-width: 1023.98px)").matches ? -1 : 1;
     let raf = 0;
-
-    const read = () => {
-      const r = section.current?.getBoundingClientRect();
-      if (!r) return 0;
-      const raw = (pinTop() - r.top) / (window.innerHeight * PER);
-      scatter(clamp(raw / 0.55, 0, 1));
-      return hold(clamp(raw, 0, n - 1));
-    };
 
     // The hint's letters break apart and drift off over the first half stop of scroll.
     const letters = Array.from(hint.current?.querySelectorAll<HTMLElement>("[data-l]") ?? []);
@@ -98,19 +80,36 @@ export default function PhotoDrum({ photos }: { photos: Photo[] }) {
       if (arrow) arrow.style.opacity = String(1 - Math.min(1, k * 2));
     };
 
+    const read = () => {
+      const r = section.current?.getBoundingClientRect();
+      if (!r) return 0;
+      const raw = (pinTop() - r.top) / (window.innerHeight * PER);
+      scatter(clamp(raw / 0.55, 0, 1));
+      return hold(clamp(raw, 0, n - 1));
+    };
+
     const draw = () => {
       raf = 0;
       pos = pos < 0 ? target : pos + (target - pos) * EASE;
       if (Math.abs(target - pos) < 0.001) pos = target;
-      if (wheel.current) wheel.current.style.transform = `translateZ(${-drumR}px)`;
       for (let i = 0; i < n; i++) {
         const card = cards.current[i];
         if (!card) continue;
-        const d = i - pos;
-        const deg = d * STEP * dir;
-        card.style.transform = `translateX(${bow * (1 - Math.cos(rad(deg)))}px) rotateX(${deg}deg) translateZ(${drumR}px)`;
-        card.style.opacity = Math.abs(d) > CULL ? "0" : "1";
-        card.style.zIndex = String(Math.round(100 - Math.abs(d) * 10));
+        // in: how far this print has been laid down; out: how far the next one covers it.
+        const t = i === 0 ? 1 : clamp(pos - (i - 1), 0, 1);
+        const out = clamp(pos - i, 0, 1);
+        const block = clamp(t / (1 - LEAD), 0, 1);
+        const img = clamp((t - LEAD) / (1 - LEAD), 0, 1);
+        const show = t > 0 && out < 1;
+        card.style.visibility = show ? "visible" : "hidden";
+        if (!show) continue;
+        card.style.transform = `scale(${1 - out * 0.06})`;
+        const [band, win, shade] = Array.from(card.children) as HTMLElement[];
+        const inner = win.firstElementChild as HTMLElement;
+        band.style.transform = `translate3d(0, ${(1 - block) * 100}%, 0)`;
+        win.style.transform = `translate3d(0, ${(1 - img) * 100}%, 0)`;
+        inner.style.transform = `translate3d(0, ${-(1 - img) * 100}%, 0) scale(${1.08 - img * 0.08})`;
+        shade.style.opacity = String(out * 0.6);
       }
       setFront(clamp(Math.round(pos), 0, n - 1));
       if (pos !== target) raf = requestAnimationFrame(draw);
@@ -130,7 +129,7 @@ export default function PhotoDrum({ photos }: { photos: Photo[] }) {
       window.removeEventListener("resize", onScroll);
       cancelAnimationFrame(raf);
     };
-  }, [cardH, drumR, bow, n]);
+  }, [cardH, n]);
 
   // Previous and Next scroll the page to that photo's stop, so scroll stays the only driver.
   const go = (i: number) => {
@@ -142,52 +141,69 @@ export default function PhotoDrum({ photos }: { photos: Photo[] }) {
   };
 
   const current = photos[front];
+  const last = front === n - 1;
 
   return (
     <div ref={section} style={{ height: `calc(100svh - 4rem + ${(n - 1) * PER * 100}svh)` }}>
       <div ref={pin} className="sticky top-16 h-[calc(100svh-4rem)]">
-        <div ref={stage} className="absolute inset-x-0 top-0 bottom-[6.5rem] overflow-hidden" style={{ perspective: `${cardH * LENS || 1000}px` }}>
-          <div ref={wheel} className="absolute left-1/2 top-1/2 [transform-style:preserve-3d]">
-            {cardH > 0 &&
-              photos.map((p, i) => {
-                const { w, h } = dims(p);
-                const isFront = i === front;
-                return (
-                  <button
-                    key={p.slug}
-                    ref={(node) => {
-                      cards.current[i] = node;
-                    }}
-                    type="button"
-                    tabIndex={isFront ? 0 : -1}
-                    aria-hidden={!isFront}
-                    aria-label={`View larger: ${p.title}`}
-                    onClick={() => (isFront ? setViewing(i) : go(i))}
-                    className="absolute block cursor-zoom-in overflow-hidden bg-graphite shadow-[0_24px_48px_-20px_rgba(0,0,0,0.8)] [backface-visibility:hidden]"
-                    style={{ width: w, height: h, marginLeft: -w / 2, marginTop: -h / 2, opacity: i === 0 ? 1 : 0 }}
-                  >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={photoSrc(p.slug, 1200)}
-                      srcSet={photoSrcSet(p)}
-                      sizes={`${Math.round(w)}px`}
-                      width={p.width}
-                      height={p.height}
-                      alt={p.alt}
-                      loading={i < 2 ? "eager" : "lazy"}
-                      decoding="async"
-                      draggable={false}
-                      className="h-full w-full select-none object-cover"
-                    />
-                  </button>
-                );
-              })}
-          </div>
-          {/* Tells people the photos turn with scroll; gone once they start. */}
+        <div ref={stage} className="absolute inset-x-0 top-0 bottom-[6.5rem] overflow-hidden">
+          {cardH > 0 &&
+            photos.map((p, i) => {
+              const { w, h } = dims(p);
+              const isFront = i === front;
+              return (
+                <button
+                  key={p.slug}
+                  ref={(node) => {
+                    cards.current[i] = node;
+                  }}
+                  type="button"
+                  tabIndex={isFront ? 0 : -1}
+                  aria-hidden={!isFront}
+                  aria-label={`View larger: ${p.title}`}
+                  onClick={() => setViewing(i)}
+                  className="absolute left-1/2 top-1/2 block cursor-zoom-in overflow-hidden"
+                  style={{
+                    width: w,
+                    height: h,
+                    marginLeft: -w / 2,
+                    marginTop: -h / 2,
+                    zIndex: i + 1,
+                    pointerEvents: isFront ? "auto" : "none",
+                    visibility: i === 0 ? "visible" : "hidden",
+                  }}
+                >
+                  <span
+                    aria-hidden
+                    className="absolute inset-0"
+                    style={{ background: `color-mix(in srgb, ${p.accent} 70%, #17181a)` }}
+                  />
+                  <span className="absolute inset-0 overflow-hidden">
+                    <span className="absolute inset-0">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={photoSrc(p.slug, 1200)}
+                        srcSet={photoSrcSet(p)}
+                        sizes={`${Math.round(w)}px`}
+                        width={p.width}
+                        height={p.height}
+                        alt={p.alt}
+                        loading={i < 2 ? "eager" : "lazy"}
+                        decoding="async"
+                        draggable={false}
+                        className="h-full w-full select-none object-cover"
+                      />
+                    </span>
+                  </span>
+                  <span aria-hidden className="absolute inset-0 bg-graphite" style={{ opacity: 0 }} />
+                </button>
+              );
+            })}
+          {/* Tells people the photos change with scroll; gone once they start. */}
           <div
             aria-hidden
             ref={hint}
-            className="drum-hint pointer-events-none absolute bottom-3 left-1/2 flex -translate-x-1/2 flex-col items-center gap-1.5 text-[0.8rem] text-silver"
+            className="stack-hint pointer-events-none absolute bottom-3 left-1/2 z-[100] flex -translate-x-1/2 flex-col items-center gap-1.5 text-[0.8rem] text-silver"
             style={{ opacity: cardH > 0 ? 1 : 0 }}
           >
             <span className="whitespace-pre">
@@ -222,14 +238,24 @@ export default function PhotoDrum({ photos }: { photos: Photo[] }) {
             <span aria-hidden className="label text-silver">
               {String(front + 1).padStart(2, "0")} / {String(n).padStart(2, "0")}
             </span>
-            <button
-              type="button"
-              onClick={() => go(front + 1)}
-              disabled={front === n - 1}
-              className="min-h-11 px-1 text-[0.95rem] font-medium text-rice transition-colors duration-200 hover:text-chrome-light disabled:text-silver/50"
-            >
-              Next
-            </button>
+            {/* At the last print, Next becomes the way into the full set. */}
+            {last && seeAll ? (
+              <Link
+                href={seeAll.href}
+                className="link flex min-h-11 items-center px-1 text-[0.95rem] font-medium text-rice decoration-rice/50 hover:decoration-rice"
+              >
+                {seeAll.label}
+              </Link>
+            ) : (
+              <button
+                type="button"
+                onClick={() => go(front + 1)}
+                disabled={last}
+                className="min-h-11 px-1 text-[0.95rem] font-medium text-rice transition-colors duration-200 hover:text-chrome-light disabled:text-silver/50"
+              >
+                Next
+              </button>
+            )}
           </div>
         </div>
       </div>
