@@ -533,18 +533,6 @@ export const photos: Photo[] = [
     featured: false,
   },
   {
-    slug: "2026-bottles",
-    accent: "#79644D",
-    width: 1600,
-    height: 2400,
-    title: "Bottles",
-    place: "2026",
-    category: "City",
-    settings: "f/2.2, 1/75s, ISO 125",
-    alt: "Rows of amber perfume bottles with glass stoppers running down a long dark table",
-    featured: false,
-  },
-  {
     slug: "2026-cookout",
     accent: "#E0601B",
     width: 1600,
