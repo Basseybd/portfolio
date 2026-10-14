@@ -22,7 +22,7 @@ export default function CutIn({ lines }: Props) {
             </span>
           ))}
         </span>
-      ))}
+      )).flatMap((line, l) => (l ? [" ", line] : [line]))}
     </>
   );
 }

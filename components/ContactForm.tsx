@@ -5,7 +5,7 @@ import { useForm, ValidationError } from "@formspree/react";
 import ThinkingOrb, { type OrbState } from "@/components/ThinkingOrb";
 
 const field =
-  "mt-1 w-full border-0 border-b border-ink/30 bg-transparent px-0 py-2.5 text-[1.0625rem] text-ink placeholder:text-steel/80 transition-colors duration-200 hover:border-ink/60 focus:border-ink focus:outline-none focus:ring-0";
+  "mt-1 w-full border-0 border-b border-ink/30 bg-transparent px-0 py-2.5 text-[1.0625rem] text-ink placeholder:text-steel transition-colors duration-200 hover:border-ink/60 focus:border-ink focus:outline-none focus:ring-0";
 
 const errorClass = "mt-1.5 block text-[0.9rem] font-medium text-ink underline decoration-ink/40";
 

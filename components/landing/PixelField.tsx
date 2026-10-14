@@ -13,6 +13,12 @@
 //
 // Both are canvas 2D, pause offscreen and in background tabs, and hold a still
 // frame for reduced motion.
+//
+// The canvas is sized once, to the door at its widest, and the door shows a
+// window onto it (see Doors.module.css). The door's --kl, --kr, --kt and --kb
+// say how much of it is clipped on each side, and the canvas stays centered on
+// the window, so cells outside it are skipped. While the clip animates, the
+// larger of the old and new windows is drawn.
 
 import { useEffect, useRef } from "react";
 import { photoSrc, type Photo } from "@/lib/content";
@@ -34,6 +40,8 @@ const LIFE_DWELL = 4600;
 const LIFE_DWELL_ACTIVE = 1500;
 const FLIP_MS = 1150;
 const RIPPLE_MS = 1500;
+// A little longer than the door's clip transition.
+const CLIP_MS = 1000;
 
 const clamp01 = (v: number) => (v < 0 ? 0 : v > 1 ? 1 : v);
 
@@ -94,6 +102,59 @@ export default function PixelField(props: PixelFieldProps) {
     let visible = true;
     let destroyed = false;
 
+    // The door's window: the fraction clipped across each axis (both sides
+    // together), the widest recent one while the clip animates, and the
+    // visible cell range it gives (inclusive).
+    let kx = Number.NaN;
+    let ky = Number.NaN;
+    let holdX = 0;
+    let holdY = 0;
+    let holdUntil = 0;
+    let c0 = 0;
+    let c1 = 0;
+    let r0 = 0;
+    let r1 = 0;
+    // How much the door hides at rest, across each axis. Photos are framed
+    // for the door at rest.
+    let restKx = 0;
+    let restKy = 0;
+
+    // Read only when something may have changed it (a hover, a resize), never
+    // per frame: reading styles mid-transition forces an extra style pass.
+    const clipVar = (cs: CSSStyleDeclaration, name: string) => parseFloat(cs.getPropertyValue(name)) || 0;
+    const readClip = () => {
+      const cs = getComputedStyle(host);
+      const nx = clipVar(cs, "--kl") + clipVar(cs, "--kr");
+      const ny = clipVar(cs, "--kt") + clipVar(cs, "--kb");
+      if (nx === kx && ny === ky) return;
+      if (!Number.isNaN(kx)) {
+        const now = performance.now();
+        const holding = now < holdUntil;
+        holdX = Math.min(holding ? holdX : kx, kx, nx);
+        holdY = Math.min(holding ? holdY : ky, ky, ny);
+        holdUntil = now + CLIP_MS;
+      }
+      kx = nx;
+      ky = ny;
+    };
+    const clipWindow = (now: number, full: boolean) => {
+      c0 = 0;
+      c1 = cols - 1;
+      r0 = 0;
+      r1 = rows - 1;
+      if (full || Number.isNaN(kx)) return;
+      const ex = now < holdUntil ? Math.min(holdX, kx) : kx;
+      const ey = now < holdUntil ? Math.min(holdY, ky) : ky;
+      // The canvas is the door less its 1.5px bezel on each side, centered on
+      // the window, so the hidden margin is the same on both sides.
+      const mx = (ex * (W + 3 * dpr)) / 2;
+      const my = (ey * (H + 3 * dpr)) / 2;
+      c0 = Math.max(0, Math.floor((mx - ox) / cell) - 1);
+      c1 = Math.min(cols - 1, Math.floor((W - mx - ox) / cell) + 1);
+      r0 = Math.max(0, Math.floor((my - oy) / cell) - 1);
+      r1 = Math.min(rows - 1, Math.floor((H - my - oy) / cell) + 1);
+    };
+
     const layout = () => {
       const rect = canvas.getBoundingClientRect();
       const cw = Math.max(1, rect.width);
@@ -120,6 +181,9 @@ export default function PixelField(props: PixelFieldProps) {
       ox = Math.round((W - cols * cell) / 2);
       oy = Math.round((H - rows * cell) / 2);
       levels = new Uint8Array(cols * rows);
+      const cs = getComputedStyle(host);
+      restKx = clipVar(cs, "--rest-kx");
+      restKy = clipVar(cs, "--rest-ky");
       if (mode === "life") {
         // Flip order: a diagonal sweep from the top left, roughened.
         order = new Float32Array(cols * rows);
@@ -134,23 +198,34 @@ export default function PixelField(props: PixelFieldProps) {
       }
     };
 
-    // Downsample a photo to one color per cell, cropped like object-fit: cover.
+    // Downsample a photo to one color per cell. It is cropped like
+    // object-fit: cover against the door at rest, exactly as it would be on a
+    // door that size, and the canvas beyond that (shown as the door widens)
+    // continues the photo, mirrored at its edges where it runs out.
     const sample = (i: number): Uint8ClampedArray | null => {
       const img = images[i];
       if (!img || !cols || !rows) return null;
-      const ta = (cols * cell) / (rows * cell);
-      const sa = img.naturalWidth / img.naturalHeight;
+      const iw = img.naturalWidth;
+      const ih = img.naturalHeight;
+      // The grid a door at rest would have: same cell, odd counts, centered.
+      const restCols = Math.ceil(((W + 3 * dpr) * (1 - restKx)) / cell) | 1;
+      const restRows = Math.ceil(((H + 3 * dpr) * (1 - restKy)) / cell) | 1;
+      const ta = restCols / restRows;
       let sx = 0;
       let sy = 0;
-      let sw = img.naturalWidth;
-      let sh = img.naturalHeight;
-      if (sa > ta) {
+      let sw = iw;
+      let sh = ih;
+      if (iw / ih > ta) {
         sw = sh * ta;
-        sx = (img.naturalWidth - sw) / 2;
+        sx = (iw - sw) / 2;
       } else {
         sh = sw / ta;
-        sy = (img.naturalHeight - sh) * 0.36;
+        sy = (ih - sh) * 0.36;
       }
+      // Photo pixels to canvas pixels.
+      const scale = (restCols * cell) / sw;
+      const left = W / 2 - (restCols * cell) / 2 - sx * scale;
+      const top = H / 2 - (restRows * cell) / 2 - sy * scale;
       // Two steps so the average is a real average, not a nearest pixel.
       const mid = document.createElement("canvas");
       mid.width = cols * 4;
@@ -163,7 +238,16 @@ export default function PixelField(props: PixelFieldProps) {
       if (!mctx || !octx) return null;
       mctx.imageSmoothingEnabled = true;
       mctx.imageSmoothingQuality = "high";
-      mctx.drawImage(img, sx, sy, sw, sh, 0, 0, mid.width, mid.height);
+      const k = 4 / cell;
+      for (let dy = -1; dy <= 1; dy++) {
+        for (let dx = -1; dx <= 1; dx++) {
+          mctx.setTransform(k * scale, 0, 0, k * scale, (left - ox) * k, (top - oy) * k);
+          // The photo, with mirrored copies around it.
+          mctx.transform(dx ? -1 : 1, 0, 0, dy ? -1 : 1, dx > 0 ? 2 * iw : 0, dy > 0 ? 2 * ih : 0);
+          mctx.drawImage(img, 0, 0);
+        }
+      }
+      mctx.setTransform(1, 0, 0, 1, 0, 0);
       octx.imageSmoothingEnabled = true;
       octx.imageSmoothingQuality = "high";
       octx.drawImage(mid, 0, 0, cols, rows);
@@ -251,15 +335,16 @@ export default function PixelField(props: PixelFieldProps) {
       return v;
     };
 
-    const drawWork = (now: number) => {
+    const drawWork = (now: number, whole = false) => {
+      clipWindow(now, whole);
       ctx.fillStyle = WORK_BG;
       ctx.fillRect(0, 0, W, H);
       const t = clock;
       const radius = 120 * dpr;
-      for (let r = 0; r < rows; r++) {
+      for (let r = r0; r <= r1; r++) {
         const cy = oy + r * cell + cell / 2;
         const ny = cy / H;
-        for (let c = 0; c < cols; c++) {
+        for (let c = c0; c <= c1; c++) {
           const cx = ox + c * cell + cell / 2;
           let v = field(cx / H, ny, t);
           v += pointerBoost(cx, cy, now, radius) * 0.55;
@@ -271,9 +356,9 @@ export default function PixelField(props: PixelFieldProps) {
         ctx.fillStyle = WORK_PALETTE[L];
         const size = Math.max(1, Math.round(cell * (0.14 + 0.72 * (L / LEVELS))));
         const inset = Math.round((cell - size) / 2);
-        for (let r = 0; r < rows; r++) {
+        for (let r = r0; r <= r1; r++) {
           const y = oy + r * cell + inset;
-          for (let c = 0; c < cols; c++) {
+          for (let c = c0; c <= c1; c++) {
             if (levels[r * cols + c] !== L) continue;
             ctx.fillRect(ox + c * cell + inset, y, size, size);
           }
@@ -281,7 +366,8 @@ export default function PixelField(props: PixelFieldProps) {
       }
     };
 
-    const drawLife = (now: number) => {
+    const drawLife = (now: number, whole = false) => {
+      clipWindow(now, whole);
       ctx.fillStyle = LIFE_BG;
       ctx.fillRect(0, 0, W, H);
       const gap = Math.max(1, Math.round(dpr));
@@ -290,8 +376,8 @@ export default function PixelField(props: PixelFieldProps) {
       const from = grid(flip ? flip.from : current);
       const to = flip ? grid(flip.to) : null;
       const fp = flip ? (now - flip.t0) / FLIP_MS : 0;
-      for (let r = 0; r < rows; r++) {
-        for (let c = 0; c < cols; c++) {
+      for (let r = r0; r <= r1; r++) {
+        for (let c = c0; c <= c1; c++) {
           const k = r * cols + c;
           let src = from;
           let h = 1;
@@ -366,9 +452,11 @@ export default function PixelField(props: PixelFieldProps) {
       }
       if (!flip && on) nextAt = Math.min(nextAt, now + LIFE_DWELL_ACTIVE);
       if (!flip && now >= nextAt) startFlip(now);
-      drawLife(now);
-
       const busy = !!flip || ripples.length > 0 || pointer.k > 0.003 || on;
+      // A frame it will sleep on is drawn in full: the window can widen
+      // (the other door let go) without waking this loop.
+      drawLife(now, !busy);
+
       if (busy) {
         raf = requestAnimationFrame(frame);
       } else {
@@ -405,8 +493,8 @@ export default function PixelField(props: PixelFieldProps) {
 
     const drawStill = () => {
       const now = performance.now();
-      if (mode === "work") drawWork(now);
-      else drawLife(now);
+      if (mode === "work") drawWork(now, true);
+      else drawLife(now, true);
     };
 
     const toLocal = (e: PointerEvent) => {
@@ -444,6 +532,7 @@ export default function PixelField(props: PixelFieldProps) {
     };
 
     layout();
+    readClip();
     if (mode === "life") {
       load(0);
       load(1);
@@ -452,10 +541,16 @@ export default function PixelField(props: PixelFieldProps) {
 
     const ro = new ResizeObserver(() => {
       layout();
+      readClip();
       drawStill();
       kick();
     });
     ro.observe(canvas);
+    // The doors change their clip by flipping data-active on an ancestor.
+    const mo = new MutationObserver(readClip);
+    for (let el = host.parentElement; el; el = el.parentElement) {
+      mo.observe(el, { attributes: true, attributeFilter: ["data-active"] });
+    }
     const io = new IntersectionObserver(([entry]) => {
       visible = entry.isIntersecting;
       update();
@@ -473,6 +568,7 @@ export default function PixelField(props: PixelFieldProps) {
       running = false;
       if (raf) cancelAnimationFrame(raf);
       ro.disconnect();
+      mo.disconnect();
       io.disconnect();
       document.removeEventListener("visibilitychange", update);
       host.removeEventListener("pointermove", onMove);

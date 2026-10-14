@@ -75,7 +75,7 @@ export default function PhotoArchive({ photos }: { photos: Photo[] }) {
                 on ? "border-ink bg-ink text-paper" : "border-ink/30 text-stone hover:border-ink hover:text-ink"
               }`}
             >
-              {f} <span className={`label ml-1 ${on ? "text-rule" : "text-stone/80"}`}>{count}</span>
+              {f} <span className={`label ml-1 ${on ? "text-rule" : "text-stone"}`}>{count}</span>
             </button>
           );
         })}
@@ -99,7 +99,8 @@ export default function PhotoArchive({ photos }: { photos: Photo[] }) {
                   width={p.width}
                   height={p.height}
                   alt={p.alt}
-                  loading={i < 6 ? "eager" : "lazy"}
+                  loading={i < 2 ? "eager" : "lazy"}
+                  fetchPriority={i === 0 ? "high" : "auto"}
                   decoding="async"
                   className="rv-img block h-auto w-full"
                 />

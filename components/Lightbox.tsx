@@ -349,7 +349,7 @@ export default function Lightbox({ photos, index, onClose, onIndex }: Props) {
             <button
               type="button"
               onClick={close}
-              className="px-2 py-2 text-[0.95rem] font-medium text-rice transition-colors duration-200 hover:text-chrome-light"
+              className="min-h-11 px-2 py-3 text-[0.95rem] font-medium text-rice transition-colors duration-200 hover:text-chrome-light"
               autoFocus
             >
               Close
@@ -411,11 +411,22 @@ export default function Lightbox({ photos, index, onClose, onIndex }: Props) {
             <span key={current.slug} className="font-display text-[1.15rem] font-medium">
               <CutIn lines={[current.title]} />
             </span>
-            <span className="flex gap-5 text-[0.9rem] text-silver">
+            <span className="flex flex-wrap gap-x-5 gap-y-1 text-[0.9rem] text-silver">
               <span>{current.place}</span>
-              <span className="label">{current.settings}</span>
+              <span className="label whitespace-nowrap">{current.settings}</span>
             </span>
           </div>
+          {/* Phones: Previous and Next where the thumb is; swiping still works. */}
+          {photos.length > 1 && (
+            <div data-lb-ui className="page flex shrink-0 items-center justify-between pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:hidden">
+              <button type="button" onClick={() => step(-1)} className="min-h-11 px-1 text-[0.95rem] font-medium text-rice">
+                Previous
+              </button>
+              <button type="button" onClick={() => step(1)} className="min-h-11 px-1 text-[0.95rem] font-medium text-rice">
+                Next
+              </button>
+            </div>
+          )}
         </div>
       )}
     </dialog>

@@ -3,6 +3,11 @@
 // The landing page body: two doors, Work and Life, each a pixel abstract.
 // Hover (or keyboard focus) widens a door, wakes its pixels and lets the other
 // recede. A click or tap goes straight in through the world transition.
+//
+// Each door is laid out once at its widest size and never resizes. What you
+// see is a window onto it (the plate): an overflow-hidden box slid over the
+// door while its contents slide back the other way, so widening is only
+// transforms, and the canvases keep a fixed backing size.
 
 import { useState, type FocusEvent, type PointerEvent } from "react";
 import PixelField from "@/components/landing/PixelField";
@@ -73,12 +78,24 @@ export default function Doors({ workHref = "/work", lifeHref = "/life", ready = 
           onFocus={onFocus("work")}
           onBlur={onBlur("work")}
         >
-          <PixelField mode="work" active={active === "work"} className={styles.pixels} />
-          <span className={styles.copy}>
-            <span className={styles.word}>
-              Work <Arrow />
+          <span className={styles.ring} aria-hidden="true" />
+          <span className={styles.shadow} aria-hidden="true" />
+          <span className={styles.plate}>
+            <span className={styles.face} />
+            <span className={styles.inner}>
+              <span className={styles.content}>
+                <PixelField mode="work" active={active === "work"} className={styles.pixels} />
+                <span className={styles.lower}>
+                  <span className={styles.copy}>
+                    <span className={styles.word}>
+                      Work <Arrow />
+                    </span>
+                    <span className={styles.line}>Software engineer. AI features, production systems.</span>
+                  </span>
+                </span>
+                <span className={styles.upper} aria-hidden="true" />
+              </span>
             </span>
-            <span className={styles.line}>Software engineer. AI features, production systems.</span>
           </span>
         </WorldLink>
 
@@ -92,25 +109,37 @@ export default function Doors({ workHref = "/work", lifeHref = "/life", ready = 
           onFocus={onFocus("life")}
           onBlur={onBlur("life")}
         >
-          <PixelField
-            mode="life"
-            photos={featured}
-            active={active === "life"}
-            onPhoto={setIndex}
-            className={styles.pixels}
-          />
-          <span className={styles.shade} aria-hidden="true" />
-          <span className={styles.meta} aria-hidden="true">
-            <span key={current.slug} className={styles.caption}>
-              {current.title}
-              {current.place ? <span>{current.place}</span> : null}
+          <span className={styles.ring} aria-hidden="true" />
+          <span className={styles.shadow} aria-hidden="true" />
+          <span className={styles.plate}>
+            <span className={styles.face} />
+            <span className={styles.inner}>
+              <span className={styles.content}>
+                <PixelField
+                  mode="life"
+                  photos={featured}
+                  active={active === "life"}
+                  onPhoto={setIndex}
+                  className={styles.pixels}
+                />
+                <span className={styles.lower}>
+                  <span className={styles.copy}>
+                    <span className={styles.word}>
+                      Life <Arrow />
+                    </span>
+                    <span className={styles.line}>Photos on the side. Travel, friends, New York.</span>
+                  </span>
+                </span>
+                <span className={styles.upper} aria-hidden="true">
+                  <span className={styles.meta}>
+                    <span key={current.slug} className={styles.caption}>
+                      {current.title}
+                      {current.place ? <span>{current.place}</span> : null}
+                    </span>
+                  </span>
+                </span>
+              </span>
             </span>
-          </span>
-          <span className={styles.copy}>
-            <span className={styles.word}>
-              Life <Arrow />
-            </span>
-            <span className={styles.line}>Photos on the side. Travel, friends, New York.</span>
           </span>
         </WorldLink>
       </nav>

@@ -316,7 +316,8 @@ export type Photo = {
   alt: string;
 };
 
-// Files live in public/photos as {slug}-640.webp, -1200.webp, -2400.webp.
+// Files live in public/photos as {slug}-640.webp, -1200.webp, -1620.webp, -2400.webp
+// (1620 is the size 3x phones take; without it they download the 2400s).
 // Everything shot on a Fujifilm X100VI (23mm). All of them appear on /photos.
 //
 // Order is the viewing order, phone first, and the grid reads across in rows.
@@ -625,12 +626,12 @@ export const favorites: Photo[] = favoriteSlugs.map((s) => {
   return photo;
 });
 
-export const photoSrc = (slug: string, size: 640 | 1200 | 2400) => `/photos/${slug}-${size}.webp`;
+export const photoSrc = (slug: string, size: 640 | 1200 | 1620 | 2400) => `/photos/${slug}-${size}.webp`;
 // Sizes are the long edge, so a portrait file is narrower than its name says.
 // The `w` descriptors give the real width, or phones pick a file that's too small.
 export const photoSrcSet = (p: Pick<Photo, "slug" | "width" | "height">) => {
   const ratio = Math.min(1, p.width / p.height);
-  return ([640, 1200, 2400] as const).map((s) => `${photoSrc(p.slug, s)} ${Math.round(s * ratio)}w`).join(", ");
+  return ([640, 1200, 1620, 2400] as const).map((s) => `${photoSrc(p.slug, s)} ${Math.round(s * ratio)}w`).join(", ");
 };
 
 export const toolkit = [
