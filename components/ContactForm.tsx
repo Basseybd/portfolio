@@ -72,7 +72,7 @@ export default function ContactForm() {
                 autoComplete="email"
                 spellCheck={false}
                 required
-                placeholder="you@company.com"
+                placeholder="you@email.com"
                 className={field}
               />
               <ValidationError prefix="Email" field="email" errors={state.errors} className={errorClass} />
