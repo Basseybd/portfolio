@@ -15,7 +15,7 @@ Next.js 15 · React 19 · TypeScript · Tailwind · Vercel
 
 - Copy, links and photos live in `lib/content.ts`. Edit there, not in components.
 - The look and the rules live in `DESIGN.md`.
-- To add a photo, drop `{slug}-640.webp`, `-1200.webp` and `-2400.webp` into `public/photos` and add an entry to `photos`. `featured: true` puts it on the Life door and deck.
+- To add a photo, drop `{slug}-640.webp`, `-1200.webp`, `-1620.webp` and `-2400.webp` (long edge, no metadata) into `public/photos` and add an entry to `photos`. Add its slug to `favoriteSlugs` to put it on the Life door and the /life stack.
 
 ## Run it
 
