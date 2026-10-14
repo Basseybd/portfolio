@@ -23,7 +23,11 @@ function SectionLink({ onWork, ...props }: Omit<WorldLinkProps, "world"> & { onW
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
-  const onWork = usePathname() === "/work";
+  const pathname = usePathname();
+  const onWork = pathname === "/work";
+  const onPhotos = pathname === "/photos";
+  // Where you are: ink plus an underline, and aria-current for screen readers.
+  const here = "text-ink underline decoration-1 underline-offset-[0.35em]";
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -49,7 +53,12 @@ export default function Navbar() {
         <ul className="hidden items-center gap-7 md:flex">
           {links.map((l) => (
             <li key={l.href}>
-              <SectionLink onWork={onWork} href={l.href} className="text-[0.975rem] text-stone transition-colors duration-200 hover:text-ink">
+              <SectionLink
+                onWork={onWork}
+                href={l.href}
+                aria-current={onWork && l.label === "Work" ? "page" : undefined}
+                className={`text-[0.975rem] transition-colors duration-200 hover:text-ink ${onWork && l.label === "Work" ? here : "text-stone"}`}
+              >
                 {l.label}
               </SectionLink>
             </li>
@@ -62,6 +71,16 @@ export default function Navbar() {
               className="text-[0.975rem] text-stone transition-colors duration-200 hover:text-ink"
             >
               Life
+            </WorldLink>
+          </li>
+          <li>
+            <WorldLink
+              href="/photos"
+              world="photos"
+              aria-current={onPhotos ? "page" : undefined}
+              className={`text-[0.975rem] transition-colors duration-200 hover:text-ink ${onPhotos ? here : "text-stone"}`}
+            >
+              Photos
             </WorldLink>
           </li>
           <li>
@@ -78,7 +97,7 @@ export default function Navbar() {
 
         <button
           type="button"
-          className="-mr-2 px-2 py-2 text-[0.95rem] font-medium md:hidden"
+          className="-mr-2 min-h-11 px-2 py-3 text-[0.95rem] font-medium md:hidden"
           aria-expanded={open}
           aria-controls="mobile-menu"
           onClick={() => setOpen((v) => !v)}
@@ -115,6 +134,17 @@ export default function Navbar() {
               className="block py-3.5 font-display text-[1.5rem] font-medium"
             >
               Life
+            </WorldLink>
+          </li>
+          <li className="border-b border-rule">
+            <WorldLink
+              href="/photos"
+              world="photos"
+              aria-current={onPhotos ? "page" : undefined}
+              onClick={() => setOpen(false)}
+              className="block py-3.5 font-display text-[1.5rem] font-medium"
+            >
+              Photos
             </WorldLink>
           </li>
           <li className="border-b border-rule">

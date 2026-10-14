@@ -37,12 +37,12 @@ export default function LifePage() {
         <nav aria-label="Main">
           <ul className="flex items-center gap-5 text-[0.95rem] sm:gap-7">
             <li>
-              <WorldLink href="/work" world="work" className="text-silver transition-colors duration-200 hover:text-rice">
+              <WorldLink href="/work" world="work" className="inline-flex min-h-11 items-center text-silver transition-colors duration-200 hover:text-rice">
                 Work
               </WorldLink>
             </li>
             <li>
-              <WorldLink href="/photos" world="photos" className="text-silver transition-colors duration-200 hover:text-rice">
+              <WorldLink href="/photos" world="photos" className="inline-flex min-h-11 items-center text-silver transition-colors duration-200 hover:text-rice">
                 Photos
               </WorldLink>
             </li>
@@ -51,7 +51,7 @@ export default function LifePage() {
                 href={site.photoArchive}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-silver transition-colors duration-200 hover:text-rice"
+                className="inline-flex min-h-11 items-center text-silver transition-colors duration-200 hover:text-rice"
               >
                 Instagram
               </a>
@@ -112,7 +112,7 @@ export default function LifePage() {
             <ul className="flex gap-x-6">
               {footerLinks.map((l) => (
                 <li key={l.label}>
-                  <a href={l.href} target="_blank" rel="noopener noreferrer" className="transition-colors duration-200 hover:text-rice">
+                  <a href={l.href} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center transition-colors duration-200 hover:text-rice">
                     {l.label}
                   </a>
                 </li>

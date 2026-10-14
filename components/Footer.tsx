@@ -14,10 +14,10 @@ export default function Footer() {
     <footer className="on-dark bg-graphite text-silver">
       <div className="page flex flex-wrap items-center justify-between gap-4 py-8 text-[0.9rem]">
         <p>&copy; {new Date().getFullYear()} Bassey Duke</p>
-        <ul className="flex flex-wrap gap-x-6 gap-y-2">
+        <ul className="flex flex-wrap gap-x-6">
           {links.map((l) => (
             <li key={l.label}>
-              <a href={l.href} target="_blank" rel="noopener noreferrer" className="transition-colors duration-200 hover:text-rice">
+              <a href={l.href} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-11 items-center transition-colors duration-200 hover:text-rice">
                 {l.label}
               </a>
             </li>

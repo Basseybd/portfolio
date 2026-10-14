@@ -270,7 +270,7 @@ export default function PhotoStack({ photos, seeAll }: { photos: Photo[]; seeAll
               type="button"
               onClick={() => go(front - 1)}
               disabled={front === 0}
-              className="min-h-11 px-1 text-[0.95rem] font-medium text-rice transition-colors duration-200 hover:text-chrome-light disabled:text-silver/50"
+              className="min-h-11 px-1 text-[0.95rem] font-medium text-rice transition-colors duration-200 hover:text-chrome-light disabled:text-silver"
             >
               Previous
             </button>
@@ -291,7 +291,7 @@ export default function PhotoStack({ photos, seeAll }: { photos: Photo[]; seeAll
                 type="button"
                 onClick={() => go(front + 1)}
                 disabled={last}
-                className="min-h-11 px-1 text-[0.95rem] font-medium text-rice transition-colors duration-200 hover:text-chrome-light disabled:text-silver/50"
+                className="min-h-11 px-1 text-[0.95rem] font-medium text-rice transition-colors duration-200 hover:text-chrome-light disabled:text-silver"
               >
                 Next
               </button>

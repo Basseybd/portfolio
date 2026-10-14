@@ -19,7 +19,7 @@ export default function CopyEmail({ email }: { email: string }) {
     <button
       type="button"
       onClick={copy}
-      className="btn-chrome px-3 py-1.5 text-[0.9rem]"
+      className="btn-chrome min-h-11 px-4 py-2.5 text-[0.9rem]"
     >
       <span aria-live="polite">{copied ? "Copied" : "Copy email"}</span>
     </button>
