@@ -37,7 +37,7 @@ export default function Landing() {
       <Doors ready={ready} />
       {intro && (
         <div data-preloader="">
-          <ChromaGlitchPreloader word="BASSEY" speed={1.3} onExit={onExit} onComplete={onComplete} />
+          <ChromaGlitchPreloader word="BASSEY" speed={2.8} onExit={onExit} onComplete={onComplete} />
         </div>
       )}
     </>

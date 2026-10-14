@@ -305,6 +305,46 @@ export function WorldTransitionProvider({ children }: { children: ReactNode }) {
     if (r.covered) void reveal();
   }, [pathname, reveal]);
 
+  // Browser Back and Forward: the page arrives under a cover in its own material,
+  // which lifts as soon as it has painted, so history moves never teleport either.
+  // iOS animates its own swipe back, so it's left alone there.
+  useEffect(() => {
+    const onPop = () => {
+      const root = rootRef.current;
+      const to = window.location.pathname;
+      if (!root || run.current || to === pathRef.current) return;
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      const ios = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+      if (ios) return;
+      const world: World = to.startsWith("/work") ? "work" : to.startsWith("/life") ? "life" : to.startsWith("/photos") ? "photos" : "home";
+      const r: Run = {
+        from: pathRef.current,
+        to,
+        reduce: false,
+        covered: true,
+        arrived: false,
+        revealing: false,
+        timer: 0,
+        anims: [],
+        detail: { world, color: world === "life" ? DEFAULT_LIFE_COLOR : undefined },
+      };
+      run.current = r;
+      root.dataset.world = world;
+      if (world === "life") {
+        const c = mix(DEFAULT_LIFE_COLOR, "#17181a", 0.3);
+        root.style.setProperty("--wt-color", c);
+        root.style.setProperty("--wt-light", mix(c, "#ffffff", 0.16));
+        root.style.setProperty("--wt-deep", mix(c, "#000000", 0.22));
+        root.style.setProperty("--wt-tint", mix(c, "#ffffff", 0.3));
+        root.style.setProperty("--wt-tint-deep", mix(c, "#ffffff", 0.12));
+      }
+      setPhase("hold");
+      r.timer = window.setTimeout(() => void reveal(), SAFETY_MS);
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, [reveal, setPhase]);
+
   useEffect(() => () => reset(), [reset]);
 
   const value = useMemo(() => ({ go, phase }), [go, phase]);

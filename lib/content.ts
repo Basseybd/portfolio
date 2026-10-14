@@ -107,7 +107,7 @@ export const selectedWork: Work[] = [
   {
     verb: "Co-built",
     title: "Preference-aware chat prototype",
-    outcome: "2nd place in an internal hackathon.",
+    outcome: "Built for a hackathon.",
     detail:
       "A Claude prototype that picks up preferences from conversation and asks the follow-up a good person would. Mention seafood, and it asks what kind.",
     stack: ["Claude", "TypeScript", "Prompt design"],
@@ -115,9 +115,9 @@ export const selectedWork: Work[] = [
   {
     verb: "Led",
     title: "Sign-in reliability",
-    outcome: "Unexpected sign-outs cut by more than half.",
+    outcome: "Far fewer people signed out mid-task.",
     detail:
-      "People were getting signed out in the middle of their work. I tracked down why and fixed it, so sessions now hold up, even across open tabs.",
+      "People were getting signed out in the middle of their work. I tracked down why and fixed it.",
     stack: ["Node.js", "React", "AWS"],
   },
   {
@@ -126,14 +126,14 @@ export const selectedWork: Work[] = [
     outcome: "Builds from minutes to seconds.",
     detail:
       "Compared the modern build tools, picked one, and moved a large React app over to it, tidying up the TypeScript setup on the way.",
-    stack: ["Rsbuild", "TypeScript"],
+    stack: ["TypeScript", "React"],
   },
   {
     verb: "Led",
     title: "React upgrade with coding agents",
     outcome: "A full React upgrade, every test passing.",
     detail:
-      "Ran the big refactors with Claude Code agents and kept the test suite green the whole way. Next up: an editor migration that clears the path to React 19.",
+      "Ran the big refactors with Claude Code agents and kept the test suite green the whole way.",
     stack: ["Claude Code", "React"],
   },
 ];
@@ -163,8 +163,8 @@ export const experience: Job[] = [
         dates: "Aug 2025 - Present",
         points: [
           "Led full-stack integration of a live AI assistant with human-in-the-loop review.",
-          "Led a sign-in reliability fix that cut unexpected sign-outs by more than half.",
-          "Moved the build to Rsbuild, from minutes to seconds.",
+          "Led a sign-in reliability fix for people getting signed out mid-task.",
+          "Moved a large app to a modern build, from minutes to seconds.",
           "Mentor junior engineers.",
         ],
       },
@@ -634,64 +634,3 @@ export const photoSrcSet = (p: Pick<Photo, "slug" | "width" | "height">) => {
   return ([640, 1200, 1620, 2400] as const).map((s) => `${photoSrc(p.slug, s)} ${Math.round(s * ratio)}w`).join(", ");
 };
 
-export const toolkit = [
-  {
-    group: "AI",
-    items: [
-      "Claude",
-      "LLM integration",
-      "Human-in-the-loop AI",
-      "AI guardrails",
-      "Claude Code",
-      "Windsurf",
-      "Copilot",
-    ],
-  },
-  { group: "Languages", items: ["TypeScript", "JavaScript", "Python", "SQL"] },
-  {
-    group: "Frontend",
-    items: [
-      "React",
-      "Next.js",
-      "Redux",
-      "React Router",
-      "Tailwind CSS",
-      "Chakra UI",
-      "Material UI",
-      "Tiptap",
-      "Rsbuild",
-    ],
-  },
-  {
-    group: "Backend",
-    items: [
-      "Node.js",
-      "Express",
-      "REST APIs",
-      "OpenAPI",
-      "Prisma",
-      "Knex",
-      "MySQL",
-      "Redis",
-      "RabbitMQ",
-    ],
-  },
-  {
-    group: "Cloud",
-    items: [
-      "AWS Lambda",
-      "SQS",
-      "API Gateway",
-      "ECR",
-      "EKS",
-      "CloudWatch",
-      "Docker",
-      "Kubernetes",
-      "CI/CD",
-    ],
-  },
-  {
-    group: "Testing",
-    items: ["Jest", "React Testing Library", "Selenium"],
-  },
-];

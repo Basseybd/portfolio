@@ -18,7 +18,7 @@ export interface ChromaGlitchGrade {
   contrast: number;
 }
 
-const DEFAULT_GRADE: ChromaGlitchGrade = { chroma: 0.9, grain: 0.14, scanlines: 0.3, contrast: 1.15 };
+const DEFAULT_GRADE: ChromaGlitchGrade = { chroma: 0.4, grain: 0.14, scanlines: 0.3, contrast: 1.15 };
 
 export interface ChromaGlitchPreloaderProps {
   /** Word tumbled through the cube, one letter per face. */

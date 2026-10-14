@@ -1,13 +1,14 @@
-import { sideBuilds, toolkit } from "@/lib/content";
+import { sideBuilds } from "@/lib/content";
 
-// Side builds and the toolkit. With no side builds listed, only the toolkit shows.
+// Side builds. The section hides itself when there are none.
 export default function SideBuilds() {
   const hasBuilds = sideBuilds.length > 0;
+  if (!hasBuilds) return null;
   return (
-    <section id="side-builds" aria-labelledby={hasBuilds ? "side-title" : "toolkit-title"}>
+    <section id="side-builds" aria-labelledby="side-title">
       <div className="page py-24 sm:py-28">
         {hasBuilds && (
-          <div className="mb-14 grid gap-10 border-b border-ink/20 pb-24 lg:grid-cols-12 lg:gap-x-12">
+          <div className="grid gap-10 lg:grid-cols-12 lg:gap-x-12">
             <h2 id="side-title" className="font-display text-[2.2rem] font-medium leading-tight lg:col-span-4">
               Side builds
             </h2>
@@ -30,20 +31,6 @@ export default function SideBuilds() {
             </ul>
           </div>
         )}
-
-        <div id="toolkit" className="grid gap-8 lg:grid-cols-12 lg:gap-x-12">
-          <h2 id="toolkit-title" className="font-display text-[2.2rem] font-medium leading-tight lg:col-span-4">
-            Toolkit
-          </h2>
-          <dl className="grid gap-x-10 gap-y-7 sm:grid-cols-2 lg:col-span-7 lg:col-start-6 lg:grid-cols-3">
-            {toolkit.map((t) => (
-              <div key={t.group}>
-                <dt className="text-[0.95rem] font-bold text-ink">{t.group}</dt>
-                <dd className="mt-1.5 text-[1rem] leading-relaxed text-stone">{t.items.join(", ")}</dd>
-              </div>
-            ))}
-          </dl>
-        </div>
       </div>
     </section>
   );
