@@ -15,7 +15,7 @@ in-app browser (iOS WebKit).
   portrait, selected work, pinned experience timeline, services, the toolkit
   (side builds show above it only when `sideBuilds` has entries), a short Off
   the clock band that points to `/life`, contact with the orb.
-- `/life` Quick and short. Bio on the left (pinned on wide screens): "Hey, I'm Bassey.", links to `/photos` and @bassey.jpeg, a one-line "Book a shoot" and a line pointing to OTL. On the right the favorites roll past on a drum as you scroll (`PhotoDrum`, page scroll drives it, transform only). Each photo holds at the front, then rolls down as the next comes over the top; tap the front one to see it big. The first is a place (`life.leadPhoto`) so it never reads as a photo of him. Reduced motion and no-JS get the print deck instead.
+- `/life` Quick and short. Bio on the left (pinned on wide screens): "Hey, I'm Bassey.", links to `/photos` and @bassey.jpeg, a one-line "Book a shoot" and a line pointing to OTL. The first photo is his mirror photo, captioned "That's me" (`life.me`), then the favorites in the order of `favorites` in `lib/content.ts`. Wide screens: a flat stack (`PhotoStack`) pinned beside the bio; scroll picks the photo and a timed wipe (a band in its accent color, then the photo) always finishes, the photo drifts a little with scroll and a hairline shows progress. Phones and tablets: a plain feed (`LifeFeed`) with color-block reveals, never pinned. Both end on "See all photos". Tap a photo for the lightbox, which grows out of it. Reduced motion and no-JS on wide screens get the print deck instead.
 - `/photos` Full archive (all photos, filters, lightbox). `?c=` keeps the filter
   and `?p=` the open photo in the URL.
 
